@@ -227,6 +227,93 @@
 
     /* ── Footer ── */
     .footer { margin-top: 24px; text-align: center; font-size: 12px; color: var(--slate-400); }
+
+    /* ── Mode tabs ── */
+    .mode-tabs {
+      display: flex; gap: 4px; background: var(--slate-100); border-radius: 10px; padding: 4px;
+      margin-bottom: 20px;
+    }
+    .mode-tab {
+      flex: 1; padding: 8px 12px; border: none; border-radius: 7px; font-size: 13px;
+      font-weight: 600; cursor: pointer; transition: all .15s ease; background: none;
+      color: var(--slate-500);
+    }
+    .mode-tab.active { background: white; color: var(--slate-900); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .mode-tab:hover:not(.active) { color: var(--slate-700); }
+
+    /* ── Text send panel ── */
+    .text-panel { display: flex; flex-direction: column; gap: 10px; }
+    .text-panel textarea {
+      width: 100%; min-height: 140px; padding: 14px; border: 2px solid var(--slate-200);
+      border-radius: 12px; font-size: 13px; font-family: 'Inter', system-ui, sans-serif;
+      color: var(--slate-700); background: var(--slate-50); resize: vertical; outline: none;
+      transition: border-color .15s;
+      line-height: 1.6;
+    }
+    .text-panel textarea:focus { border-color: var(--blue); background: white; }
+    .text-panel textarea::placeholder { color: var(--slate-400); }
+    .text-char-count { font-size: 11px; color: var(--slate-400); text-align: right; margin-top: -6px; }
+
+    /* ── Transfer history ── */
+    .history-section {
+      margin-top: 20px; border: 1px solid var(--slate-200); border-radius: 12px; overflow: hidden;
+    }
+    .history-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; cursor: pointer; user-select: none;
+      background: var(--slate-50); transition: background .15s;
+    }
+    .history-header:hover { background: var(--slate-100); }
+    .history-header-left { display: flex; align-items: center; gap: 8px; }
+    .history-title { font-size: 13px; font-weight: 600; color: var(--slate-700); }
+    .history-count {
+      background: var(--blue); color: white; font-size: 10px; font-weight: 700;
+      border-radius: 99px; padding: 1px 6px; min-width: 18px; text-align: center;
+    }
+    .history-chevron { font-size: 12px; color: var(--slate-400); transition: transform .2s; }
+    .history-chevron.open { transform: rotate(180deg); }
+    .history-body { border-top: 1px solid var(--slate-200); }
+    .history-list { max-height: 260px; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .history-list::-webkit-scrollbar { width: 4px; }
+    .history-list::-webkit-scrollbar-track { background: var(--slate-100); border-radius: 99px; }
+    .history-list::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 99px; }
+
+    .history-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px; border-radius: 8px; background: white;
+      border: 1px solid var(--slate-100);
+    }
+    .history-item-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .history-item-body { flex: 1; min-width: 0; }
+    .history-item-name { font-size: 13px; font-weight: 600; color: var(--slate-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-item-meta { font-size: 11px; color: var(--slate-400); margin-top: 2px; }
+    .history-item-preview {
+      font-size: 12px; color: var(--slate-500); margin-top: 4px;
+      white-space: pre-wrap; word-break: break-all;
+      max-height: 48px; overflow: hidden;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    }
+    .history-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .history-btn {
+      background: var(--slate-100); border: none; border-radius: 6px; cursor: pointer;
+      padding: 5px 8px; font-size: 12px; color: var(--slate-600); font-weight: 600;
+      transition: background .15s, color .15s;
+    }
+    .history-btn:hover { background: var(--slate-200); }
+    .history-btn.copied { background: #dcfce7; color: #15803d; }
+    .history-empty { padding: 20px; text-align: center; font-size: 13px; color: var(--slate-400); }
+
+    /* ── Received text message ── */
+    .rx-text-item {
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;
+      padding: 14px 16px; margin-bottom: 8px;
+    }
+    .rx-text-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #3b82f6; margin-bottom: 8px; }
+    .rx-text-content {
+      font-size: 13px; color: var(--slate-700); white-space: pre-wrap; word-break: break-all;
+      line-height: 1.6; max-height: 200px; overflow-y: auto;
+    }
+    .rx-text-actions { display: flex; gap: 6px; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -249,6 +336,15 @@
 
   <!-- ══ SENDER VIEW ══ -->
   <div id="sender-view">
+
+    <!-- Mode tabs -->
+    <div class="mode-tabs" id="mode-tabs">
+      <button class="mode-tab active" id="tab-files" onclick="switchMode('files')">📂 Files</button>
+      <button class="mode-tab" id="tab-text" onclick="switchMode('text')">✏️ Text / URL</button>
+    </div>
+
+    <!-- File mode -->
+    <div id="file-mode">
     <div class="drop-zone" id="drop-zone">
       <div class="drop-zone-inner">
         <div class="drop-icon">📂</div>
@@ -270,6 +366,16 @@
 
     <div style="margin-top:16px">
       <button class="btn btn-primary" id="create-btn" disabled>Select files to continue</button>
+    </div>
+    </div><!-- end #file-mode -->
+
+    <!-- Text mode -->
+    <div id="text-mode" class="hidden">
+      <div class="text-panel">
+        <textarea id="text-input" placeholder="Paste text, a URL, a code snippet, or any message…" maxlength="50000"></textarea>
+        <div class="text-char-count"><span id="text-char-num">0</span> / 50,000</div>
+        <button class="btn btn-primary" id="send-text-btn" disabled>Send Text</button>
+      </div>
     </div>
 
     <!-- Room section (after room created) -->
@@ -308,6 +414,22 @@
       <div class="done-icon">🎉</div>
       <h3>All Files Sent!</h3>
       <p id="sender-done-sub">All files delivered and verified successfully.</p>
+    </div>
+
+    <!-- Transfer History -->
+    <div class="history-section hidden" id="sender-history-section">
+      <div class="history-header" id="sender-history-toggle">
+        <div class="history-header-left">
+          <span class="history-title">Session History</span>
+          <span class="history-count" id="sender-history-count">0</span>
+        </div>
+        <span class="history-chevron open" id="sender-history-chevron">▼</span>
+      </div>
+      <div class="history-body" id="sender-history-body">
+        <div class="history-list" id="sender-history-list">
+          <div class="history-empty">Nothing sent yet</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -349,6 +471,22 @@
         <div class="done-icon">✅</div>
         <h3>All Files Received!</h3>
         <p id="rx-done-sub">All files SHA-256 verified — no corruption detected.</p>
+      </div>
+
+      <!-- Receiver Transfer History -->
+      <div class="history-section hidden" id="rx-history-section" style="margin-top:16px">
+        <div class="history-header" id="rx-history-toggle">
+          <div class="history-header-left">
+            <span class="history-title">Session History</span>
+            <span class="history-count" id="rx-history-count">0</span>
+          </div>
+          <span class="history-chevron open" id="rx-history-chevron">▼</span>
+        </div>
+        <div class="history-body" id="rx-history-body">
+          <div class="history-list" id="rx-history-list">
+            <div class="history-empty">Nothing received yet</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -398,6 +536,90 @@ async function getIceServers() {
   }
 }
 
+// ── History helpers ──────────────────────────────────────
+function setupHistoryToggle(toggleId, bodyId, chevronId) {
+  let open = true;
+  document.getElementById(toggleId).addEventListener('click', () => {
+    open = !open;
+    document.getElementById(bodyId).style.display = open ? '' : 'none';
+    document.getElementById(chevronId).classList.toggle('open', open);
+  });
+}
+
+function addFileToHistory(listId, countId, sectionId, name, size, blobUrl, verified) {
+  const section = document.getElementById(sectionId);
+  section.classList.remove('hidden');
+  const list = document.getElementById(listId);
+  // Remove empty placeholder
+  const empty = list.querySelector('.history-empty');
+  if (empty) empty.remove();
+
+  const count = document.getElementById(countId);
+  count.textContent = parseInt(count.textContent || '0') + 1;
+
+  const item = document.createElement('div');
+  item.className = 'history-item';
+  const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  item.innerHTML = `
+    <div class="history-item-icon">${fileEmoji(name)}</div>
+    <div class="history-item-body">
+      <div class="history-item-name">${name}</div>
+      <div class="history-item-meta">${fmt(size)} · ${ts} · ${verified ? '✓ verified' : '⚠️ unverified'}</div>
+    </div>
+    <div class="history-item-actions">
+      ${blobUrl ? `<a href="${blobUrl}" download="${name}"><button class="history-btn">⬇ Re-download</button></a>` : ''}
+    </div>
+  `;
+  list.appendChild(item);
+  list.scrollTop = list.scrollHeight;
+}
+
+function addTextToHistory(listId, countId, sectionId, text) {
+  const section = document.getElementById(sectionId);
+  section.classList.remove('hidden');
+  const list = document.getElementById(listId);
+  const empty = list.querySelector('.history-empty');
+  if (empty) empty.remove();
+
+  const count = document.getElementById(countId);
+  count.textContent = parseInt(count.textContent || '0') + 1;
+
+  const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const item = document.createElement('div');
+  item.className = 'history-item';
+  const preview = text.length > 80 ? text.slice(0, 80) + '…' : text;
+  item.innerHTML = `
+    <div class="history-item-icon">✏️</div>
+    <div class="history-item-body">
+      <div class="history-item-name">Text message</div>
+      <div class="history-item-meta">${text.length} chars · ${ts}</div>
+      <div class="history-item-preview">${preview.replace(/</g,'&lt;')}</div>
+    </div>
+    <div class="history-item-actions">
+      <button class="history-btn" onclick="copyHistoryText(this, ${JSON.stringify(text)})">Copy</button>
+    </div>
+  `;
+  list.appendChild(item);
+  list.scrollTop = list.scrollHeight;
+}
+
+function copyHistoryText(btn, text) {
+  navigator.clipboard.writeText(text);
+  btn.textContent = '✓ Copied';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+}
+
+// ── Mode switching (sender only) ──────────────────────────
+let currentMode = 'files';
+function switchMode(mode) {
+  currentMode = mode;
+  document.getElementById('file-mode').classList.toggle('hidden', mode !== 'files');
+  document.getElementById('text-mode').classList.toggle('hidden', mode !== 'text');
+  document.getElementById('tab-files').classList.toggle('active', mode === 'files');
+  document.getElementById('tab-text').classList.toggle('active', mode === 'text');
+}
+
 const roomIdFromUrl = location.pathname.startsWith('/room/')
   ? location.pathname.split('/room/')[1] : null;
 const isSender = !roomIdFromUrl;
@@ -411,7 +633,7 @@ const socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
 // SENDER
 // ══════════════════════════════════════════════════════════
 if (isSender) {
-  let selectedFiles = []; // array of File objects
+  let selectedFiles = [];
   let roomId = null, pc = null, dc = null;
 
   const dropZone  = document.getElementById('drop-zone');
@@ -424,6 +646,49 @@ if (isSender) {
   const statusDot = document.getElementById('status-dot');
   const statusTxt = document.getElementById('status-text');
   const addMoreBtn = document.getElementById('add-more-btn');
+  const textInput = document.getElementById('text-input');
+  const sendTextBtn = document.getElementById('send-text-btn');
+  const textCharNum = document.getElementById('text-char-num');
+
+  setupHistoryToggle('sender-history-toggle', 'sender-history-body', 'sender-history-chevron');
+
+  // Text input char counter + button enable
+  textInput.addEventListener('input', () => {
+    const len = textInput.value.length;
+    textCharNum.textContent = len.toLocaleString();
+    sendTextBtn.disabled = len === 0;
+    sendTextBtn.textContent = len === 0 ? 'Send Text' : `⚡ Send Text${roomId ? '' : ' (create room first)'}`;
+  });
+
+  // Send text button — if no room yet, create one first then send
+  sendTextBtn.addEventListener('click', async () => {
+    const text = textInput.value.trim();
+    if (!text) return;
+    if (!dc || dc.readyState !== 'open') {
+      // Need to create room first
+      if (!roomId) {
+        sendTextBtn.disabled = true;
+        sendTextBtn.textContent = 'Creating room…';
+        socket.emit('create-room');
+        // Will auto-send after connection established — store intent
+        pendingTextSend = text;
+      }
+      return;
+    }
+    doSendText(text);
+  });
+
+  let pendingTextSend = null;
+
+  function doSendText(text) {
+    dc.send(JSON.stringify({ type: 'text-message', text }));
+    addTextToHistory('sender-history-list', 'sender-history-count', 'sender-history-section', text);
+    textInput.value = '';
+    textCharNum.textContent = '0';
+    sendTextBtn.disabled = true;
+    sendTextBtn.textContent = '✓ Sent!';
+    setTimeout(() => { sendTextBtn.textContent = 'Send Text'; }, 2000);
+  }
 
   function renderFileList() {
     fileListEl.innerHTML = '';
@@ -468,7 +733,6 @@ if (isSender) {
     const oversized = [];
     for (const f of newFiles) {
       if (f.size > MAX_FILE_SIZE) { oversized.push(f.name); continue; }
-      // avoid duplicates by name+size
       const dup = selectedFiles.some(x => x.name === f.name && x.size === f.size);
       if (!dup) selectedFiles.push(f);
     }
@@ -494,7 +758,7 @@ if (isSender) {
     const map = {
       waiting:    ['yellow', 'Waiting for receiver to join…'],
       connecting: ['blue',   'Establishing connection…'],
-      connected:  ['blue',   'Sending files…'],
+      connected:  ['blue',   'Connected — ready to send'],
       failed:     ['red',    'Connection failed — please refresh'],
       completed:  ['green',  'All transfers complete!'],
     };
@@ -517,6 +781,14 @@ if (isSender) {
     createBtn.classList.add('hidden');
     dropZone.classList.add('hidden');
     fileListSection.classList.add('hidden');
+
+    // Show mode tabs in text mode after room creation (for text-only flow)
+    if (currentMode === 'text') {
+      document.getElementById('text-mode').classList.remove('hidden');
+      sendTextBtn.disabled = !textInput.value.trim();
+      sendTextBtn.textContent = textInput.value.trim() ? '⚡ Send Text' : 'Send Text';
+    }
+
     setStatus('waiting');
   });
 
@@ -538,7 +810,16 @@ if (isSender) {
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') setStatus('failed');
     };
-    dc.onopen = () => { setStatus('connected'); startSendingAll(); };
+    dc.onopen = () => {
+      setStatus('connected');
+      // If text mode and pending send, fire it
+      if (pendingTextSend) {
+        doSendText(pendingTextSend);
+        pendingTextSend = null;
+      } else if (currentMode === 'files') {
+        startSendingAll();
+      }
+    };
 
     socket.on('answer', async answer => {
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
@@ -556,7 +837,6 @@ if (isSender) {
     const files = selectedFiles;
     const totalSize = files.reduce((s, f) => s + f.size, 0);
 
-    // Build transfer UI
     const transferList = document.getElementById('sender-transfer-list');
     transferList.innerHTML = '';
     files.forEach((f, i) => {
@@ -577,7 +857,6 @@ if (isSender) {
     document.getElementById('sender-progress').classList.remove('hidden');
     document.getElementById('sender-files-counter').textContent = `0 / ${files.length}`;
 
-    // Send a session-start message so receiver knows total count
     dc.send(JSON.stringify({ type: 'session-start', totalFiles: files.length, totalSize }));
 
     let globalSent = 0;
@@ -591,13 +870,11 @@ if (isSender) {
       statusEl.className = 'file-row-status sending';
       statusEl.textContent = '0%';
 
-      // Pre-compute hash
       const hash = await sha256(file);
       dc.send(JSON.stringify({ type: 'meta', index: i, name: file.name, size: file.size, mime: file.type, hash }));
 
       await new Promise((resolve) => {
         let offset = 0;
-        const fileStart = Date.now();
 
         function sendChunk() {
           while (offset < file.size) {
@@ -629,6 +906,9 @@ if (isSender) {
                 statusEl.textContent = '✓';
                 progEl.style.width = '100%';
                 document.getElementById('sender-files-counter').textContent = `${i + 1} / ${files.length}`;
+                // Add to sender history (sender knows the file, no blob needed)
+                addFileToHistory('sender-history-list', 'sender-history-count', 'sender-history-section',
+                  file.name, file.size, null, true);
                 resolve();
               } else {
                 sendChunk();
@@ -641,7 +921,6 @@ if (isSender) {
       });
     }
 
-    // All done
     dc.send(JSON.stringify({ type: 'all-done' }));
     document.getElementById('sender-progress').classList.add('hidden');
     document.getElementById('sender-done').classList.remove('hidden');
@@ -657,13 +936,9 @@ if (isSender) {
 if (!isSender) {
   let pc = null;
 
-  // KEY FIX: store chunks and meta per file index so async sha256
-  // calls never race with the next file's incoming data.
-  // fileStore[index] = { meta, chunks, received, startTime }
   const fileStore = new Map();
-  let activeIndex = -1; // which file index is currently receiving binary chunks
+  let activeIndex = -1;
 
-  // Session state
   let sessionTotal = 0, sessionTotalSize = 0, sessionReceived = 0, sessionReceivedSize = 0;
   let sessionStart = null;
 
@@ -672,6 +947,8 @@ if (!isSender) {
   const rxErrorBox = document.getElementById('rx-error');
   const rxErrorMsg = document.getElementById('rx-error-msg');
   const rxFileList = document.getElementById('rx-file-list');
+
+  setupHistoryToggle('rx-history-toggle', 'rx-history-body', 'rx-history-chevron');
 
   function setRxWaiting(title, sub) {
     document.getElementById('rx-waiting-state').classList.remove('hidden');
@@ -725,8 +1002,6 @@ if (!isSender) {
       const ch = e.channel;
       ch.binaryType = 'arraybuffer';
 
-      // Use a synchronous message queue so async processing never
-      // lets a later message overwrite state read by an earlier await.
       const msgQueue = [];
       let processing = false;
 
@@ -762,8 +1037,31 @@ if (!isSender) {
             setRxActive('receiving');
           }
 
+          else if (msg.type === 'text-message') {
+            // Show receiver view active if it was in waiting state
+            document.getElementById('rx-waiting-state').classList.add('hidden');
+            document.getElementById('rx-transfer-state').classList.remove('hidden');
+            rxDot.className = 'dot green';
+            rxStatus.textContent = 'Text message received';
+
+            // Render inline text bubble
+            const bubble = document.createElement('div');
+            bubble.className = 'rx-text-item';
+            bubble.innerHTML = `
+              <div class="rx-text-label">✏️ Text Message</div>
+              <div class="rx-text-content">${msg.text.replace(/</g,'&lt;')}</div>
+              <div class="rx-text-actions">
+                <button class="history-btn" onclick="copyHistoryText(this, ${JSON.stringify(msg.text)})">📋 Copy</button>
+                ${isUrl(msg.text) ? `<a href="${msg.text.trim()}" target="_blank" rel="noopener"><button class="history-btn">↗ Open URL</button></a>` : ''}
+              </div>
+            `;
+            rxFileList.appendChild(bubble);
+
+            // Add to history
+            addTextToHistory('rx-history-list', 'rx-history-count', 'rx-history-section', msg.text);
+          }
+
           else if (msg.type === 'meta') {
-            // Initialize a fresh store for this file
             fileStore.set(msg.index, {
               meta: msg,
               chunks: [],
@@ -772,7 +1070,6 @@ if (!isSender) {
             });
             activeIndex = msg.index;
 
-            // Add a row for this file
             const row = document.createElement('div');
             row.className = 'file-row';
             row.id = `rx-row-${msg.index}`;
@@ -794,17 +1091,16 @@ if (!isSender) {
             const entry = fileStore.get(idx);
             if (!entry) return;
 
-            // Snapshot data before any await — nothing can overwrite entry.chunks
-            // because the queue serialises all messages.
             const { meta, chunks } = entry;
             const blob = new Blob(chunks, { type: meta.mime });
 
-            // Compute hash (await is safe here; queue is paused until we return)
             const computedHash = await sha256(blob);
             const verified = computedHash === meta.hash;
 
             const statusEl = document.getElementById(`rx-fstatus-${idx}`);
             const progEl   = document.getElementById(`rx-prog-${idx}`);
+
+            const blobUrl = URL.createObjectURL(blob);
 
             if (verified) {
               statusEl.className = 'file-row-status done';
@@ -812,13 +1108,12 @@ if (!isSender) {
               progEl.style.width = '100%';
 
               // Auto-download
-              const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
-              a.href = url; a.download = meta.name; a.click();
+              a.href = blobUrl; a.download = meta.name; a.click();
 
-              // Manual download button
+              // Manual re-download button on the row
               const dlA = document.createElement('a');
-              dlA.href = url;
+              dlA.href = blobUrl;
               dlA.download = meta.name;
               dlA.style.cssText = 'position:relative;z-index:1;flex-shrink:0';
               dlA.innerHTML = `<button class="btn-sm" style="background:#dcfce7;color:#15803d">⬇</button>`;
@@ -828,7 +1123,10 @@ if (!isSender) {
               statusEl.textContent = '⚠️';
             }
 
-            // Free memory for this file
+            // Add to history with re-download link
+            addFileToHistory('rx-history-list', 'rx-history-count', 'rx-history-section',
+              meta.name, meta.size, verified ? blobUrl : null, verified);
+
             fileStore.delete(idx);
 
             sessionReceived++;
@@ -845,7 +1143,7 @@ if (!isSender) {
           return;
         }
 
-        // Binary chunk — always belongs to activeIndex
+        // Binary chunk
         const entry = fileStore.get(activeIndex);
         if (!entry) return;
 
@@ -883,6 +1181,11 @@ if (!isSender) {
       rxErrorBox.classList.remove('hidden');
     }
   });
+}
+
+function isUrl(text) {
+  try { const u = new URL(text.trim()); return u.protocol === 'http:' || u.protocol === 'https:'; }
+  catch { return false; }
 }
 </script>
 </body>
