@@ -3,101 +3,387 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PeerDrop</title>
+  <title>PeerDrop — Instant P2P File Transfer</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f8fafc; color: #0f172a; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .card { background: white; border-radius: 16px; box-shadow: 0 4px 24px #0001; padding: 40px; max-width: 480px; width: 100%; }
-    h1 { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
-    p.sub { color: #64748b; margin-bottom: 32px; font-size: 14px; }
-    .drop-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 16px; }
-    .drop-zone:hover, .drop-zone.over { border-color: #3b82f6; background: #eff6ff; }
-    .drop-zone .icon { font-size: 40px; margin-bottom: 8px; }
-    .drop-zone p { color: #64748b; font-size: 14px; }
-    .file-info { background: #f1f5f9; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px; }
-    .file-info strong { display: block; font-size: 15px; margin-bottom: 2px; }
-    button { width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background .2s; }
-    button:hover { background: #2563eb; }
-    button:disabled { background: #94a3b8; cursor: not-allowed; }
-    .link-box { background: #f1f5f9; border-radius: 8px; padding: 12px 16px; margin: 16px 0; word-break: break-all; font-size: 13px; color: #334155; }
-    .copy-btn { margin-top: 8px; padding: 10px; font-size: 14px; background: #0f172a; }
-    .copy-btn:hover { background: #1e293b; }
-    .status { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 8px; background: #f1f5f9; margin: 16px 0; font-size: 14px; font-weight: 500; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .dot.yellow { background: #eab308; }
-    .dot.blue   { background: #3b82f6; animation: pulse 1s infinite; }
-    .dot.green  { background: #22c55e; }
-    .dot.red    { background: #ef4444; }
-    @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.4 } }
-    .progress-wrap { margin: 16px 0; }
-    .progress-label { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 6px; }
-    .progress-bar { height: 10px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
-    .progress-fill { height: 100%; background: #3b82f6; border-radius: 99px; transition: width .3s; }
-    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
-    .stat { background: #f8fafc; border-radius: 8px; padding: 10px 14px; font-size: 13px; }
-    .stat span { display: block; color: #94a3b8; font-size: 11px; margin-bottom: 2px; }
-    .download-btn { background: #16a34a; margin-top: 16px; }
-    .download-btn:hover { background: #15803d; }
-    .error { color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; font-size: 14px; margin: 12px 0; }
-    .hidden { display: none; }
+
+    :root {
+      --blue: #3b82f6;
+      --blue-dark: #2563eb;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-400: #94a3b8;
+      --slate-500: #64748b;
+      --slate-700: #334155;
+      --slate-900: #0f172a;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 50%, #f0fdf4 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--slate-900);
+      letter-spacing: -0.5px;
+    }
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .tagline {
+      margin-top: 6px;
+      color: var(--slate-500);
+      font-size: 14px;
+    }
+    .badges {
+      display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap;
+    }
+    .badge {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: 99px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--slate-500);
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+      padding: 36px;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    /* ── Drop zone ── */
+    .drop-zone {
+      border: 2px dashed var(--slate-200);
+      border-radius: 14px;
+      padding: 44px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s ease;
+      background: var(--slate-50);
+      position: relative;
+      overflow: hidden;
+    }
+    .drop-zone::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .drop-zone:hover, .drop-zone.over {
+      border-color: var(--blue);
+      transform: translateY(-1px);
+    }
+    .drop-zone:hover::before, .drop-zone.over::before { opacity: 1; }
+    .drop-zone-inner { position: relative; z-index: 1; }
+    .drop-icon {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, #dbeafe, #ede9fe);
+      border-radius: 14px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      margin-bottom: 14px;
+    }
+    .drop-zone h3 { font-size: 15px; font-weight: 600; color: var(--slate-700); margin-bottom: 4px; }
+    .drop-zone p { font-size: 13px; color: var(--slate-400); }
+    .drop-zone p strong { color: var(--blue); }
     #input-file { display: none; }
+
+    /* ── File info ── */
+    .file-info {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+    .file-icon {
+      width: 40px; height: 40px; flex-shrink: 0;
+      background: linear-gradient(135deg, #dbeafe, #ede9fe);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .file-meta { min-width: 0; }
+    .file-meta strong { display: block; font-size: 14px; font-weight: 600; color: var(--slate-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-meta span { font-size: 12px; color: var(--slate-400); }
+
+    /* ── Buttons ── */
+    .btn {
+      width: 100%; padding: 14px;
+      border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: all .15s ease;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+    .btn-primary:hover { box-shadow: 0 6px 16px rgba(99,102,241,0.4); transform: translateY(-1px); }
+    .btn-primary:disabled { background: var(--slate-200); color: var(--slate-400); box-shadow: none; cursor: not-allowed; transform: none; }
+    .btn-dark { background: var(--slate-900); color: white; margin-top: 8px; }
+    .btn-dark:hover { background: var(--slate-700); }
+    .btn-green { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; box-shadow: 0 4px 12px rgba(34,197,94,0.3); margin-top: 8px; }
+    .btn-green:hover { box-shadow: 0 6px 16px rgba(34,197,94,0.4); transform: translateY(-1px); }
+
+    /* ── Room link ── */
+    .room-link-box {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 16px 0 4px;
+    }
+    .room-link-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--slate-400); margin-bottom: 4px; }
+    .room-link-url { font-size: 13px; color: var(--slate-700); word-break: break-all; line-height: 1.4; }
+
+    /* ── Status ── */
+    .status-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--slate-200);
+      background: var(--slate-50);
+      margin: 16px 0;
+      font-size: 14px; font-weight: 500; color: var(--slate-700);
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot.yellow { background: var(--yellow); box-shadow: 0 0 0 3px rgba(245,158,11,0.2); }
+    .dot.blue   { background: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); animation: pulse 1.2s infinite; }
+    .dot.green  { background: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
+    .dot.red    { background: var(--red); box-shadow: 0 0 0 3px rgba(239,68,68,0.2); }
+    @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.3 } }
+
+    /* ── Progress ── */
+    .progress-section { margin: 16px 0; }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .progress-label { font-size: 13px; font-weight: 600; color: var(--slate-700); }
+    .progress-pct { font-size: 13px; font-weight: 700; color: var(--blue); }
+    .progress-track { height: 8px; background: var(--slate-100); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #3b82f6, #6366f1); transition: width .3s ease; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .stat-card { background: var(--slate-50); border: 1px solid var(--slate-100); border-radius: 10px; padding: 10px 14px; }
+    .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: var(--slate-400); margin-bottom: 2px; }
+    .stat-value { font-size: 15px; font-weight: 700; color: var(--slate-700); }
+
+    /* ── Done banner ── */
+    .done-banner {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-top: 16px;
+    }
+    .done-banner .done-icon { font-size: 32px; margin-bottom: 8px; }
+    .done-banner h3 { font-size: 16px; font-weight: 700; color: #15803d; }
+    .done-banner p { font-size: 13px; color: #166534; margin-top: 4px; }
+
+    /* ── Receiver ── */
+    .rx-waiting {
+      text-align: center;
+      padding: 32px 16px;
+    }
+    .rx-waiting .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid var(--slate-100);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .rx-waiting h3 { font-size: 15px; font-weight: 600; color: var(--slate-700); margin-bottom: 4px; }
+    .rx-waiting p { font-size: 13px; color: var(--slate-400); }
+
+    /* ── Error ── */
+    .error-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #dc2626;
+      margin-top: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── Divider ── */
+    .divider { height: 1px; background: var(--slate-100); margin: 20px 0; }
+
+    .hidden { display: none !important; }
+
+    /* ── Footer ── */
+    .footer { margin-top: 24px; text-align: center; font-size: 12px; color: var(--slate-400); }
+    .footer a { color: var(--slate-400); text-decoration: none; }
   </style>
 </head>
 <body>
-<div class="card">
-  <h1>⚡ PeerDrop</h1>
-  <p class="sub">Browser-to-browser file transfer. No servers, no uploads.</p>
 
-  <!-- SENDER VIEW -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    PeerDrop
+  </div>
+  <p class="tagline">Instant browser-to-browser file transfer</p>
+  <div class="badges">
+    <span class="badge">🔒 End-to-end encrypted</span>
+    <span class="badge">🚫 No server storage</span>
+    <span class="badge">⚡ Direct P2P</span>
+  </div>
+</div>
+
+<div class="card">
+
+  <!-- ══ SENDER VIEW ══ -->
   <div id="sender-view">
     <div class="drop-zone" id="drop-zone">
-      <div class="icon">📁</div>
-      <p>Drop a file here or <strong>click to browse</strong></p>
+      <div class="drop-zone-inner">
+        <div class="drop-icon">📂</div>
+        <h3>Drop your file here</h3>
+        <p>or <strong>click to browse</strong> &nbsp;·&nbsp; Max 50MB</p>
+      </div>
       <input type="file" id="input-file" />
     </div>
-    <div class="file-info hidden" id="file-info">
-      <strong id="file-name"></strong>
-      <span id="file-size" style="color:#64748b;font-size:13px"></span>
-    </div>
-    <button id="create-btn" disabled>Select a file first</button>
-    <div class="hidden" id="room-section">
-      <div class="status"><div class="dot" id="status-dot"></div><span id="status-text"></span></div>
-      <div class="link-box" id="room-link"></div>
-      <button class="copy-btn" id="copy-btn">Copy Link</button>
-    </div>
-    <div class="progress-wrap hidden" id="sender-progress">
-      <div class="progress-label"><span>Sending...</span><span id="sender-pct">0%</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="sender-fill" style="width:0%"></div></div>
-      <div class="stats">
-        <div class="stat"><span>Speed</span><strong id="sender-speed">—</strong></div>
-        <div class="stat"><span>ETA</span><strong id="sender-eta">—</strong></div>
+
+    <div class="file-info hidden" id="file-info" style="margin-top:14px">
+      <div class="file-icon">📄</div>
+      <div class="file-meta">
+        <strong id="file-name"></strong>
+        <span id="file-size"></span>
       </div>
     </div>
-    <div class="hidden" id="sender-done" style="text-align:center;padding:20px;color:#16a34a;font-weight:700;font-size:18px">✓ Transfer Complete!</div>
+
+    <div style="margin-top:16px">
+      <button class="btn btn-primary" id="create-btn" disabled>
+        Select a file to continue
+      </button>
+    </div>
+
+    <div class="hidden" id="room-section">
+      <div class="divider"></div>
+      <div class="room-link-label" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--slate-400);margin-bottom:8px">Share this link with the receiver</div>
+      <div class="room-link-box">
+        <div class="room-link-label">Invite Link</div>
+        <div class="room-link-url" id="room-link"></div>
+      </div>
+      <button class="btn btn-dark" id="copy-btn">📋 Copy Link</button>
+      <div class="status-bar" id="status-bar" style="margin-top:16px">
+        <div class="dot" id="status-dot"></div>
+        <span id="status-text"></span>
+      </div>
+    </div>
+
+    <div class="progress-section hidden" id="sender-progress">
+      <div class="divider"></div>
+      <div class="progress-header">
+        <span class="progress-label">Sending file…</span>
+        <span class="progress-pct" id="sender-pct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="sender-fill" style="width:0%"></div></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Speed</div><div class="stat-value" id="sender-speed">—</div></div>
+        <div class="stat-card"><div class="stat-label">ETA</div><div class="stat-value" id="sender-eta">—</div></div>
+      </div>
+    </div>
+
+    <div class="done-banner hidden" id="sender-done">
+      <div class="done-icon">🎉</div>
+      <h3>Transfer Complete!</h3>
+      <p>File delivered and verified successfully.</p>
+    </div>
   </div>
 
-  <!-- RECEIVER VIEW -->
+  <!-- ══ RECEIVER VIEW ══ -->
   <div id="receiver-view" class="hidden">
-    <div class="status"><div class="dot" id="rx-dot"></div><span id="rx-status">Connecting to room...</span></div>
-    <div class="hidden" id="rx-file-info" style="margin:16px 0">
-      <div class="file-info">
-        <strong id="rx-file-name"></strong>
-        <span id="rx-file-size" style="color:#64748b;font-size:13px"></span>
+
+    <div id="rx-waiting-state">
+      <div class="rx-waiting">
+        <div class="spinner"></div>
+        <h3 id="rx-status-title">Joining room…</h3>
+        <p id="rx-status-sub">Please wait</p>
       </div>
     </div>
-    <div class="progress-wrap hidden" id="rx-progress">
-      <div class="progress-label"><span>Receiving...</span><span id="rx-pct">0%</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="rx-fill" style="width:0%"></div></div>
-      <div class="stats">
-        <div class="stat"><span>Speed</span><strong id="rx-speed">—</strong></div>
-        <div class="stat"><span>ETA</span><strong id="rx-eta">—</strong></div>
+
+    <div class="hidden" id="rx-transfer-state">
+      <div class="status-bar">
+        <div class="dot" id="rx-dot"></div>
+        <span id="rx-status"></span>
       </div>
+
+      <div class="file-info hidden" id="rx-file-info" style="margin:16px 0">
+        <div class="file-icon">📄</div>
+        <div class="file-meta">
+          <strong id="rx-file-name"></strong>
+          <span id="rx-file-size"></span>
+        </div>
+      </div>
+
+      <div class="progress-section hidden" id="rx-progress">
+        <div class="progress-header">
+          <span class="progress-label">Receiving file…</span>
+          <span class="progress-pct" id="rx-pct">0%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="rx-fill" style="width:0%"></div></div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Speed</div><div class="stat-value" id="rx-speed">—</div></div>
+          <div class="stat-card"><div class="stat-label">ETA</div><div class="stat-value" id="rx-eta">—</div></div>
+        </div>
+      </div>
+
+      <div class="done-banner hidden" id="rx-done">
+        <div class="done-icon">✅</div>
+        <h3>File Received!</h3>
+        <p id="rx-done-sub">SHA-256 verified — no corruption detected.</p>
+      </div>
+
+      <a id="download-btn" class="hidden">
+        <button class="btn btn-green">⬇ Download <span id="rx-dl-name"></span></button>
+      </a>
     </div>
-    <a id="download-btn" class="hidden" style="display:none">
-      <button class="download-btn" style="margin-top:16px">⬇ Download File</button>
-    </a>
-    <div class="error hidden" id="rx-error"></div>
+
+    <div class="error-box hidden" id="rx-error">⚠️ <span id="rx-error-msg"></span></div>
   </div>
+
+</div>
+
+<div class="footer">
+  Files transfer directly between browsers · Never stored on any server
 </div>
 
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
@@ -105,7 +391,6 @@
 const SERVER_URL = 'https://quickshare2qt.onrender.com';
 const CHUNK_SIZE = 64 * 1024;
 
-// ── Helpers ──────────────────────────────────────────────
 function fmt(bytes) {
   if (!bytes) return '0 B';
   const u = ['B','KB','MB','GB'];
@@ -121,8 +406,6 @@ async function sha256(data) {
   const buf = await crypto.subtle.digest('SHA-256', data instanceof Blob ? await data.arrayBuffer() : data);
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
-
-// ── Fetch TURN servers ────────────────────────────────────
 async function getIceServers() {
   try {
     const res = await fetch('https://lukieee.metered.live/api/v1/turn/credentials?apiKey=71b0f0927625d50cd5dcc2addab7b97d908a');
@@ -132,60 +415,45 @@ async function getIceServers() {
   }
 }
 
-// ── Detect sender vs receiver ─────────────────────────────
 const roomIdFromUrl = location.pathname.startsWith('/room/')
-  ? location.pathname.split('/room/')[1]
-  : null;
-
+  ? location.pathname.split('/room/')[1] : null;
 const isSender = !roomIdFromUrl;
 
 document.getElementById('sender-view').classList.toggle('hidden', !isSender);
 document.getElementById('receiver-view').classList.toggle('hidden', isSender);
 
-// ── Socket ────────────────────────────────────────────────
 const socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
 
-// ══════════════════════════════════════════════════════════
-// SENDER
-// ══════════════════════════════════════════════════════════
+// ══ SENDER ══
 if (isSender) {
-  let selectedFile = null;
-  let roomId = null;
-  let pc = null;
-  let dc = null;
+  let selectedFile = null, roomId = null, pc = null, dc = null;
+  const MAX_SIZE = 50 * 1024 * 1024;
 
   const dropZone  = document.getElementById('drop-zone');
   const fileInput = document.getElementById('input-file');
   const createBtn = document.getElementById('create-btn');
   const fileInfo  = document.getElementById('file-info');
   const roomSec   = document.getElementById('room-section');
-  const roomLink  = document.getElementById('room-link');
-  const copyBtn   = document.getElementById('copy-btn');
   const statusDot = document.getElementById('status-dot');
   const statusTxt = document.getElementById('status-text');
 
-  const MAX_SIZE = 50 * 1024 * 1024;
-
   function setFile(f) {
-    if (f.size > MAX_SIZE) {
-      alert(`File too large: ${fmt(f.size)}. Maximum is 50MB.`);
-      return;
-    }
+    if (f.size > MAX_SIZE) { alert(`File too large (${fmt(f.size)}). Maximum is 50MB.`); return; }
     selectedFile = f;
     document.getElementById('file-name').textContent = f.name;
     document.getElementById('file-size').textContent = fmt(f.size);
     fileInfo.classList.remove('hidden');
     createBtn.disabled = false;
-    createBtn.textContent = 'Create Room & Get Link';
+    createBtn.textContent = '⚡ Create Room & Get Link';
   }
 
   function setStatus(state) {
     const map = {
       waiting:    ['yellow', 'Waiting for receiver to join…'],
-      connecting: ['blue',   'Connecting…'],
-      connected:  ['green',  'Connected — sending file…'],
-      failed:     ['red',    'Connection failed. Please refresh.'],
-      completed:  ['green',  'Done!'],
+      connecting: ['blue',   'Establishing connection…'],
+      connected:  ['blue',   'Sending file…'],
+      failed:     ['red',    'Connection failed — please refresh'],
+      completed:  ['green',  'Transfer complete!'],
     };
     const [color, text] = map[state] || ['yellow', state];
     statusDot.className = `dot ${color}`;
@@ -198,7 +466,7 @@ if (isSender) {
   dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('over'); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
   fileInput.addEventListener('change', e => { if (e.target.files[0]) setFile(e.target.files[0]); });
 
-  createBtn.addEventListener('click', async () => {
+  createBtn.addEventListener('click', () => {
     if (!selectedFile) return;
     createBtn.disabled = true;
     createBtn.textContent = 'Creating room…';
@@ -207,24 +475,24 @@ if (isSender) {
 
   socket.on('room-created', ({ roomId: id }) => {
     roomId = id;
-    const link = `${location.origin}/room/${id}`;
-    roomLink.textContent = link;
+    document.getElementById('room-link').textContent = `${location.origin}/room/${id}`;
     roomSec.classList.remove('hidden');
-    setStatus('waiting');
     createBtn.classList.add('hidden');
+    fileInfo.classList.add('hidden');
+    dropZone.classList.add('hidden');
+    setStatus('waiting');
   });
 
-  copyBtn.addEventListener('click', () => {
+  document.getElementById('copy-btn').addEventListener('click', function() {
     navigator.clipboard.writeText(`${location.origin}/room/${roomId}`);
-    copyBtn.textContent = 'Copied!';
-    setTimeout(() => copyBtn.textContent = 'Copy Link', 2000);
+    this.textContent = '✓ Copied!';
+    setTimeout(() => this.textContent = '📋 Copy Link', 2000);
   });
 
   socket.on('peer-joined', async () => {
     setStatus('connecting');
     const iceServers = await getIceServers();
     pc = new RTCPeerConnection({ iceServers });
-
     dc = pc.createDataChannel('file', { ordered: true });
 
     pc.onicecandidate = e => {
@@ -232,9 +500,7 @@ if (isSender) {
     };
 
     pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-        setStatus('failed');
-      }
+      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') setStatus('failed');
     };
 
     dc.onopen = () => {
@@ -245,7 +511,6 @@ if (isSender) {
     socket.on('answer', async answer => {
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
     });
-
     socket.on('ice-candidate', async candidate => {
       try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
     });
@@ -258,14 +523,7 @@ if (isSender) {
   async function startSending() {
     const file = selectedFile;
     const hash = await sha256(file);
-    const progress = document.getElementById('sender-progress');
-    const fill     = document.getElementById('sender-fill');
-    const pct      = document.getElementById('sender-pct');
-    const spd      = document.getElementById('sender-speed');
-    const eta      = document.getElementById('sender-eta');
-
-    progress.classList.remove('hidden');
-
+    document.getElementById('sender-progress').classList.remove('hidden');
     dc.send(JSON.stringify({ type: 'meta', name: file.name, size: file.size, mime: file.type, hash }));
 
     let offset = 0;
@@ -273,32 +531,24 @@ if (isSender) {
 
     function sendChunk() {
       while (offset < file.size) {
-        if (dc.bufferedAmount > CHUNK_SIZE * 16) {
-          setTimeout(sendChunk, 50);
-          return;
-        }
+        if (dc.bufferedAmount > CHUNK_SIZE * 16) { setTimeout(sendChunk, 50); return; }
         const slice = file.slice(offset, offset + CHUNK_SIZE);
         slice.arrayBuffer().then(buf => {
           dc.send(buf);
           offset += buf.byteLength;
-
           const elapsed = (Date.now() - start) / 1000;
           const speed = elapsed > 0 ? offset / elapsed : 0;
-          const remaining = (file.size - offset) / (speed || 1);
           const p = (offset / file.size) * 100;
-
-          fill.style.width = `${p}%`;
-          pct.textContent = `${p.toFixed(0)}%`;
-          spd.textContent = `${fmt(speed)}/s`;
-          eta.textContent = fmtEta(remaining);
-
+          document.getElementById('sender-fill').style.width = `${p}%`;
+          document.getElementById('sender-pct').textContent = `${p.toFixed(0)}%`;
+          document.getElementById('sender-speed').textContent = `${fmt(speed)}/s`;
+          document.getElementById('sender-eta').textContent = fmtEta((file.size - offset) / (speed || 1));
           if (offset >= file.size) {
             dc.send(JSON.stringify({ type: 'done' }));
             document.getElementById('sender-done').classList.remove('hidden');
+            document.getElementById('sender-progress').classList.add('hidden');
             setStatus('completed');
-          } else {
-            sendChunk();
-          }
+          } else { sendChunk(); }
         });
         break;
       }
@@ -307,123 +557,107 @@ if (isSender) {
   }
 }
 
-// ══════════════════════════════════════════════════════════
-// RECEIVER
-// ══════════════════════════════════════════════════════════
+// ══ RECEIVER ══
 if (!isSender) {
-  let pc = null;
-  let chunks = [];
-  let meta = null;
-  let received = 0;
-  let startTime = null;
+  let pc = null, chunks = [], meta = null, received = 0, startTime = null;
 
-  const rxDot    = document.getElementById('rx-dot');
-  const rxStatus = document.getElementById('rx-status');
-  const rxError  = document.getElementById('rx-error');
+  const rxDot      = document.getElementById('rx-dot');
+  const rxStatus   = document.getElementById('rx-status');
+  const rxErrorBox = document.getElementById('rx-error');
+  const rxErrorMsg = document.getElementById('rx-error-msg');
 
-  function setRxStatus(state) {
+  function setRxWaiting(title, sub) {
+    document.getElementById('rx-waiting-state').classList.remove('hidden');
+    document.getElementById('rx-transfer-state').classList.add('hidden');
+    document.getElementById('rx-status-title').textContent = title;
+    document.getElementById('rx-status-sub').textContent = sub;
+  }
+
+  function setRxActive(state) {
+    document.getElementById('rx-waiting-state').classList.add('hidden');
+    document.getElementById('rx-transfer-state').classList.remove('hidden');
     const map = {
-      joining:     ['blue',   'Joining room…'],
-      waiting:     ['yellow', 'Waiting for sender…'],
-      connecting:  ['blue',   'Connecting…'],
-      receiving:   ['blue',   'Receiving file…'],
-      done:        ['green',  'Transfer complete — file verified ✓'],
-      failed:      ['red',    'Connection failed. Please refresh.'],
-      error:       ['red',    'Verification failed!'],
+      connecting: ['blue',  'Establishing connection…'],
+      receiving:  ['blue',  'Receiving file…'],
+      done:       ['green', 'Transfer complete — SHA-256 verified ✓'],
+      failed:     ['red',   'Connection failed. Please refresh.'],
+      error:      ['red',   'Verification failed — file may be corrupted.'],
     };
-    const [color, text] = map[state] || ['yellow', state];
+    const [color, text] = map[state] || ['blue', state];
     rxDot.className = `dot ${color}`;
     rxStatus.textContent = text;
   }
 
-  setRxStatus('joining');
+  setRxWaiting('Joining room…', 'Connecting to signaling server');
   socket.emit('join-room', { roomId: roomIdFromUrl });
 
   socket.on('room-error', ({ message }) => {
-    rxError.textContent = message;
-    rxError.classList.remove('hidden');
-    setRxStatus('failed');
+    rxErrorMsg.textContent = message;
+    rxErrorBox.classList.remove('hidden');
+    setRxWaiting('Room not found', message);
   });
 
-  socket.on('room-joined', () => setRxStatus('waiting'));
+  socket.on('room-joined', () => setRxWaiting('Waiting for sender…', 'Keep this tab open'));
 
   socket.on('offer', async offer => {
-    setRxStatus('connecting');
+    setRxActive('connecting');
     const iceServers = await getIceServers();
     pc = new RTCPeerConnection({ iceServers });
 
     pc.onicecandidate = e => {
       if (e.candidate) socket.emit('ice-candidate', { roomId: roomIdFromUrl, candidate: e.candidate });
     };
-
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-        setRxStatus('failed');
+        setRxActive('failed');
       }
     };
-
-    socket.on('ice-candidate', async candidate => {
-      try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
-    });
+    socket.on('ice-candidate', async c => { try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {} });
 
     pc.ondatachannel = e => {
-      const channel = e.channel;
-      channel.binaryType = 'arraybuffer';
-
-      channel.onmessage = async event => {
-        if (typeof event.data === 'string') {
-          const msg = JSON.parse(event.data);
-
+      const ch = e.channel;
+      ch.binaryType = 'arraybuffer';
+      ch.onmessage = async ev => {
+        if (typeof ev.data === 'string') {
+          const msg = JSON.parse(ev.data);
           if (msg.type === 'meta') {
-            meta = msg;
-            received = 0;
-            chunks = [];
-            startTime = Date.now();
+            meta = msg; received = 0; chunks = []; startTime = Date.now();
             document.getElementById('rx-file-name').textContent = msg.name;
             document.getElementById('rx-file-size').textContent = fmt(msg.size);
             document.getElementById('rx-file-info').classList.remove('hidden');
             document.getElementById('rx-progress').classList.remove('hidden');
-            setRxStatus('receiving');
+            document.getElementById('rx-dl-name').textContent = msg.name;
+            setRxActive('receiving');
           }
-
           if (msg.type === 'done') {
             const blob = new Blob(chunks, { type: meta.mime });
             const computedHash = await sha256(blob);
             const verified = computedHash === meta.hash;
-
-            if (verified) {
-              setRxStatus('done');
-            } else {
-              setRxStatus('error');
-            }
-
+            setRxActive(verified ? 'done' : 'error');
+            document.getElementById('rx-done').classList.remove('hidden');
+            if (!verified) document.getElementById('rx-done-sub').textContent = '⚠️ Hash mismatch — file may be corrupted.';
             const url = URL.createObjectURL(blob);
-            const a = document.getElementById('download-btn');
-            a.href = url;
-            a.download = meta.name;
-            a.style.display = "block";
-            // auto-trigger download
-            const autoA = document.createElement("a");
-            autoA.href = url;
-            autoA.download = meta.name;
-            autoA.click();
-            a.classList.remove('hidden');
+            const dlBtn = document.getElementById('download-btn');
+            dlBtn.href = url;
+            dlBtn.download = meta.name;
+            dlBtn.style.display = 'block';
+            dlBtn.classList.remove('hidden');
+            document.getElementById('rx-progress').classList.add('hidden');
+            // auto-trigger
+            const a = document.createElement('a');
+            a.href = url; a.download = meta.name; a.click();
           }
           return;
         }
-
-        chunks.push(event.data);
-        received += event.data.byteLength;
-
+        chunks.push(ev.data);
+        received += ev.data.byteLength;
         const elapsed = (Date.now() - startTime) / 1000;
         const speed = elapsed > 0 ? received / elapsed : 0;
-        const remaining = (meta.size - received) / (speed || 1);
         const p = (received / meta.size) * 100;
-
         document.getElementById('rx-fill').style.width = `${p}%`;
         document.getElementById('rx-pct').textContent = `${p.toFixed(0)}%`;
         document.getElementById('rx-speed').textContent = `${fmt(speed)}/s`;
-        document.getElementById('rx-eta').textContent = fmtEta(remaining);
+        document.getElementById('rx-eta').textContent = fmtEta((meta.size - received) / (speed || 1));
       };
     };
 
@@ -434,10 +668,10 @@ if (!isSender) {
   });
 
   socket.on('peer-disconnected', () => {
-    if (rxStatus.textContent !== 'Transfer complete — file verified ✓') {
-      setRxStatus('failed');
-      rxError.textContent = 'Sender disconnected.';
-      rxError.classList.remove('hidden');
+    if (rxStatus && rxStatus.textContent.indexOf('complete') === -1) {
+      setRxActive('failed');
+      rxErrorMsg.textContent = 'Sender disconnected.';
+      rxErrorBox.classList.remove('hidden');
     }
   });
 }
