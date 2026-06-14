@@ -656,10 +656,16 @@ if (isSender) {
 // ══════════════════════════════════════════════════════════
 if (!isSender) {
   let pc = null;
-  // Per-file state
-  let currentMeta = null, currentChunks = [], currentReceived = 0, currentStart = null;
+
+  // KEY FIX: store chunks and meta per file index so async sha256
+  // calls never race with the next file's incoming data.
+  // fileStore[index] = { meta, chunks, received, startTime }
+  const fileStore = new Map();
+  let activeIndex = -1; // which file index is currently receiving binary chunks
+
   // Session state
   let sessionTotal = 0, sessionTotalSize = 0, sessionReceived = 0, sessionReceivedSize = 0;
+  let sessionStart = null;
 
   const rxDot      = document.getElementById('rx-dot');
   const rxStatus   = document.getElementById('rx-status');
@@ -718,26 +724,53 @@ if (!isSender) {
     pc.ondatachannel = e => {
       const ch = e.channel;
       ch.binaryType = 'arraybuffer';
-      ch.onmessage = async ev => {
-        if (typeof ev.data === 'string') {
-          const msg = JSON.parse(ev.data);
+
+      // Use a synchronous message queue so async processing never
+      // lets a later message overwrite state read by an earlier await.
+      const msgQueue = [];
+      let processing = false;
+
+      async function processQueue() {
+        if (processing) return;
+        processing = true;
+        while (msgQueue.length > 0) {
+          await handleMessage(msgQueue.shift());
+        }
+        processing = false;
+      }
+
+      ch.onmessage = ev => {
+        msgQueue.push(ev.data);
+        processQueue();
+      };
+
+      async function handleMessage(data) {
+        if (typeof data === 'string') {
+          const msg = JSON.parse(data);
 
           if (msg.type === 'session-start') {
             sessionTotal = msg.totalFiles;
             sessionTotalSize = msg.totalSize;
             sessionReceived = 0;
             sessionReceivedSize = 0;
+            sessionStart = Date.now();
+            fileStore.clear();
+            activeIndex = -1;
             rxFileList.innerHTML = '';
             document.getElementById('rx-overall-progress').classList.remove('hidden');
             document.getElementById('rx-files-counter').textContent = `0 / ${sessionTotal}`;
             setRxActive('receiving');
           }
 
-          if (msg.type === 'meta') {
-            currentMeta = msg;
-            currentChunks = [];
-            currentReceived = 0;
-            currentStart = Date.now();
+          else if (msg.type === 'meta') {
+            // Initialize a fresh store for this file
+            fileStore.set(msg.index, {
+              meta: msg,
+              chunks: [],
+              received: 0,
+              startTime: Date.now(),
+            });
+            activeIndex = msg.index;
 
             // Add a row for this file
             const row = document.createElement('div');
@@ -753,15 +786,22 @@ if (!isSender) {
               <span class="file-row-status sending" id="rx-fstatus-${msg.index}">0%</span>
             `;
             rxFileList.appendChild(row);
-
             document.getElementById('rx-progress-label').textContent = `Receiving: ${msg.name}`;
           }
 
-          if (msg.type === 'file-done') {
-            const blob = new Blob(currentChunks, { type: currentMeta.mime });
+          else if (msg.type === 'file-done') {
+            const idx = msg.index;
+            const entry = fileStore.get(idx);
+            if (!entry) return;
+
+            // Snapshot data before any await — nothing can overwrite entry.chunks
+            // because the queue serialises all messages.
+            const { meta, chunks } = entry;
+            const blob = new Blob(chunks, { type: meta.mime });
+
+            // Compute hash (await is safe here; queue is paused until we return)
             const computedHash = await sha256(blob);
-            const verified = computedHash === currentMeta.hash;
-            const idx = currentMeta.index;
+            const verified = computedHash === meta.hash;
 
             const statusEl = document.getElementById(`rx-fstatus-${idx}`);
             const progEl   = document.getElementById(`rx-prog-${idx}`);
@@ -770,14 +810,16 @@ if (!isSender) {
               statusEl.className = 'file-row-status done';
               statusEl.textContent = '✓';
               progEl.style.width = '100%';
-              // auto-download
+
+              // Auto-download
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
-              a.href = url; a.download = currentMeta.name; a.click();
-              // Add a download button too
+              a.href = url; a.download = meta.name; a.click();
+
+              // Manual download button
               const dlA = document.createElement('a');
               dlA.href = url;
-              dlA.download = currentMeta.name;
+              dlA.download = meta.name;
               dlA.style.cssText = 'position:relative;z-index:1;flex-shrink:0';
               dlA.innerHTML = `<button class="btn-sm" style="background:#dcfce7;color:#15803d">⬇</button>`;
               document.getElementById(`rx-row-${idx}`).appendChild(dlA);
@@ -786,31 +828,38 @@ if (!isSender) {
               statusEl.textContent = '⚠️';
             }
 
+            // Free memory for this file
+            fileStore.delete(idx);
+
             sessionReceived++;
             document.getElementById('rx-files-counter').textContent = `${sessionReceived} / ${sessionTotal}`;
           }
 
-          if (msg.type === 'all-done') {
+          else if (msg.type === 'all-done') {
             document.getElementById('rx-done').classList.remove('hidden');
             document.getElementById('rx-done-sub').textContent =
               `${sessionTotal} file${sessionTotal > 1 ? 's' : ''} SHA-256 verified — no corruption detected.`;
             setRxActive('done');
           }
+
           return;
         }
 
-        // Binary chunk
-        currentChunks.push(ev.data);
-        currentReceived += ev.data.byteLength;
-        sessionReceivedSize += ev.data.byteLength;
+        // Binary chunk — always belongs to activeIndex
+        const entry = fileStore.get(activeIndex);
+        if (!entry) return;
 
-        const filePct = (currentReceived / currentMeta.size) * 100;
-        const statusEl = document.getElementById(`rx-fstatus-${currentMeta.index}`);
-        const progEl   = document.getElementById(`rx-prog-${currentMeta.index}`);
+        entry.chunks.push(data);
+        entry.received += data.byteLength;
+        sessionReceivedSize += data.byteLength;
+
+        const filePct = (entry.received / entry.meta.size) * 100;
+        const statusEl = document.getElementById(`rx-fstatus-${activeIndex}`);
+        const progEl   = document.getElementById(`rx-prog-${activeIndex}`);
         if (statusEl) statusEl.textContent = `${filePct.toFixed(0)}%`;
         if (progEl) progEl.style.width = `${filePct}%`;
 
-        const elapsed = (Date.now() - currentStart) / 1000;
+        const elapsed = (Date.now() - sessionStart) / 1000;
         const speed = elapsed > 0 ? sessionReceivedSize / elapsed : 0;
         const overallPct = sessionTotalSize > 0 ? (sessionReceivedSize / sessionTotalSize) * 100 : 0;
 
@@ -818,7 +867,7 @@ if (!isSender) {
         document.getElementById('rx-pct').textContent = `${overallPct.toFixed(0)}%`;
         document.getElementById('rx-speed').textContent = `${fmt(speed)}/s`;
         document.getElementById('rx-eta').textContent = fmtEta((sessionTotalSize - sessionReceivedSize) / (speed || 1));
-      };
+      }
     };
 
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
