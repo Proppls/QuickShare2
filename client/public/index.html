@@ -232,14 +232,15 @@ if (isSender) {
     };
 
     pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'connected') {
-        setStatus('connected');
-        startSending();
-      }
-      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-        setStatus('failed');
-      }
-    };
+  if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+    setStatus('failed');
+  }
+};
+
+dc.onopen = () => {
+  setStatus('connected');
+  startSending();
+};
 
     socket.on('answer', async answer => {
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
