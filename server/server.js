@@ -8,10 +8,12 @@ const server = http.createServer(app);
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 
-app.use(cors({ origin: CLIENT_URL }));
+const allowedOrigins = CLIENT_URL.split(',').map(u => u.trim());
+
+app.use(cors({ origin: allowedOrigins }));
 
 const io = new Server(server, {
-  cors: { origin: CLIENT_URL, methods: ['GET', 'POST'] },
+  cors: { origin: allowedOrigins, methods: ['GET', 'POST'] },
 });
 
 // roomId -> { host: socketId, peer: socketId|null }
