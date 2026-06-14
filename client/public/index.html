@@ -36,120 +36,107 @@
     }
 
     /* ── Header ── */
-    .header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
+    .header { text-align: center; margin-bottom: 32px; }
     .logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--slate-900);
-      letter-spacing: -0.5px;
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 26px; font-weight: 800; color: var(--slate-900); letter-spacing: -0.5px;
     }
     .logo-icon {
       width: 40px; height: 40px;
       background: linear-gradient(135deg, #3b82f6, #6366f1);
       border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
     }
-    .tagline {
-      margin-top: 6px;
-      color: var(--slate-500);
-      font-size: 14px;
-    }
-    .badges {
-      display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap;
-    }
+    .tagline { margin-top: 6px; color: var(--slate-500); font-size: 14px; }
+    .badges { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
     .badge {
-      background: white;
-      border: 1px solid var(--slate-200);
-      border-radius: 99px;
-      padding: 4px 10px;
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--slate-500);
+      background: white; border: 1px solid var(--slate-200); border-radius: 99px;
+      padding: 4px 10px; font-size: 11px; font-weight: 500; color: var(--slate-500);
       display: flex; align-items: center; gap: 4px;
     }
 
     /* ── Card ── */
     .card {
-      background: white;
-      border-radius: 20px;
+      background: white; border-radius: 20px;
       box-shadow: 0 8px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
-      padding: 36px;
-      max-width: 500px;
-      width: 100%;
+      padding: 36px; max-width: 520px; width: 100%;
     }
 
     /* ── Drop zone ── */
     .drop-zone {
-      border: 2px dashed var(--slate-200);
-      border-radius: 14px;
-      padding: 44px 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: all .2s ease;
-      background: var(--slate-50);
-      position: relative;
-      overflow: hidden;
+      border: 2px dashed var(--slate-200); border-radius: 14px; padding: 44px 24px;
+      text-align: center; cursor: pointer; transition: all .2s ease;
+      background: var(--slate-50); position: relative; overflow: hidden;
     }
     .drop-zone::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
-      opacity: 0;
-      transition: opacity .2s;
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, #eff6ff, #f0fdf4); opacity: 0; transition: opacity .2s;
     }
-    .drop-zone:hover, .drop-zone.over {
-      border-color: var(--blue);
-      transform: translateY(-1px);
-    }
+    .drop-zone:hover, .drop-zone.over { border-color: var(--blue); transform: translateY(-1px); }
     .drop-zone:hover::before, .drop-zone.over::before { opacity: 1; }
     .drop-zone-inner { position: relative; z-index: 1; }
     .drop-icon {
       width: 56px; height: 56px;
       background: linear-gradient(135deg, #dbeafe, #ede9fe);
-      border-radius: 14px;
-      display: inline-flex; align-items: center; justify-content: center;
-      font-size: 26px;
-      margin-bottom: 14px;
+      border-radius: 14px; display: inline-flex; align-items: center; justify-content: center;
+      font-size: 26px; margin-bottom: 14px;
     }
     .drop-zone h3 { font-size: 15px; font-weight: 600; color: var(--slate-700); margin-bottom: 4px; }
     .drop-zone p { font-size: 13px; color: var(--slate-400); }
     .drop-zone p strong { color: var(--blue); }
     #input-file { display: none; }
 
-    /* ── File info ── */
-    .file-info {
-      display: flex; align-items: center; gap: 12px;
-      background: var(--slate-50);
-      border: 1px solid var(--slate-200);
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 16px;
+    /* ── File list ── */
+    .file-list {
+      margin-top: 14px;
+      display: flex; flex-direction: column; gap: 6px;
+      max-height: 220px; overflow-y: auto;
     }
-    .file-icon {
-      width: 40px; height: 40px; flex-shrink: 0;
+    .file-list::-webkit-scrollbar { width: 4px; }
+    .file-list::-webkit-scrollbar-track { background: var(--slate-100); border-radius: 99px; }
+    .file-list::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 99px; }
+
+    .file-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--slate-50); border: 1px solid var(--slate-200);
+      border-radius: 10px; padding: 10px 12px;
+      position: relative; overflow: hidden;
+    }
+    .file-row-progress {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      background: linear-gradient(90deg, rgba(59,130,246,0.08), rgba(99,102,241,0.08));
+      border-radius: 10px; width: 0; transition: width .3s ease; pointer-events: none;
+    }
+    .file-row-icon {
+      width: 34px; height: 34px; flex-shrink: 0;
       background: linear-gradient(135deg, #dbeafe, #ede9fe);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px;
+      position: relative; z-index: 1;
     }
-    .file-meta { min-width: 0; }
-    .file-meta strong { display: block; font-size: 14px; font-weight: 600; color: var(--slate-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .file-meta span { font-size: 12px; color: var(--slate-400); }
+    .file-row-meta { min-width: 0; flex: 1; position: relative; z-index: 1; }
+    .file-row-name { font-size: 13px; font-weight: 600; color: var(--slate-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-row-size { font-size: 11px; color: var(--slate-400); }
+    .file-row-status { font-size: 11px; font-weight: 600; flex-shrink: 0; position: relative; z-index: 1; }
+    .file-row-status.pending  { color: var(--slate-400); }
+    .file-row-status.sending  { color: var(--blue); }
+    .file-row-status.done     { color: var(--green); }
+    .file-row-status.error    { color: var(--red); }
+    .file-row-remove {
+      background: none; border: none; cursor: pointer; color: var(--slate-400);
+      font-size: 14px; padding: 2px 4px; border-radius: 4px; line-height: 1;
+      position: relative; z-index: 1;
+      transition: color .15s, background .15s;
+    }
+    .file-row-remove:hover { color: var(--red); background: #fef2f2; }
+
+    .file-list-summary {
+      font-size: 12px; color: var(--slate-400); margin-top: 6px; text-align: right;
+    }
 
     /* ── Buttons ── */
     .btn {
-      width: 100%; padding: 14px;
-      border: none; border-radius: 12px;
-      font-size: 15px; font-weight: 600;
-      cursor: pointer; transition: all .15s ease;
+      width: 100%; padding: 14px; border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 600; cursor: pointer; transition: all .15s ease;
       display: flex; align-items: center; justify-content: center; gap: 8px;
     }
     .btn:active { transform: scale(0.98); }
@@ -160,14 +147,18 @@
     .btn-dark:hover { background: var(--slate-700); }
     .btn-green { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; box-shadow: 0 4px 12px rgba(34,197,94,0.3); margin-top: 8px; }
     .btn-green:hover { box-shadow: 0 6px 16px rgba(34,197,94,0.4); transform: translateY(-1px); }
+    .btn-sm {
+      width: auto; padding: 8px 14px; font-size: 13px; border: none; border-radius: 8px;
+      font-weight: 600; cursor: pointer; transition: all .15s ease;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--slate-100); color: var(--slate-700);
+    }
+    .btn-sm:hover { background: var(--slate-200); }
 
     /* ── Room link ── */
     .room-link-box {
-      background: var(--slate-50);
-      border: 1px solid var(--slate-200);
-      border-radius: 12px;
-      padding: 14px 16px;
-      margin: 16px 0 4px;
+      background: var(--slate-50); border: 1px solid var(--slate-200);
+      border-radius: 12px; padding: 14px 16px; margin: 16px 0 4px;
     }
     .room-link-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--slate-400); margin-bottom: 4px; }
     .room-link-url { font-size: 13px; color: var(--slate-700); word-break: break-all; line-height: 1.4; }
@@ -175,12 +166,9 @@
     /* ── Status ── */
     .status-bar {
       display: flex; align-items: center; gap: 10px;
-      padding: 12px 16px;
-      border-radius: 12px;
-      border: 1px solid var(--slate-200);
-      background: var(--slate-50);
-      margin: 16px 0;
-      font-size: 14px; font-weight: 500; color: var(--slate-700);
+      padding: 12px 16px; border-radius: 12px;
+      border: 1px solid var(--slate-200); background: var(--slate-50);
+      margin: 16px 0; font-size: 14px; font-weight: 500; color: var(--slate-700);
     }
     .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .dot.yellow { background: var(--yellow); box-shadow: 0 0 0 3px rgba(245,158,11,0.2); }
@@ -189,14 +177,14 @@
     .dot.red    { background: var(--red); box-shadow: 0 0 0 3px rgba(239,68,68,0.2); }
     @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.3 } }
 
-    /* ── Progress ── */
-    .progress-section { margin: 16px 0; }
+    /* ── Overall progress ── */
+    .overall-progress { margin: 16px 0; }
     .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .progress-label { font-size: 13px; font-weight: 600; color: var(--slate-700); }
     .progress-pct { font-size: 13px; font-weight: 700; color: var(--blue); }
     .progress-track { height: 8px; background: var(--slate-100); border-radius: 99px; overflow: hidden; }
     .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #3b82f6, #6366f1); transition: width .3s ease; }
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
     .stat-card { background: var(--slate-50); border: 1px solid var(--slate-100); border-radius: 10px; padding: 10px 14px; }
     .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: var(--slate-400); margin-bottom: 2px; }
     .stat-value { font-size: 15px; font-weight: 700; color: var(--slate-700); }
@@ -204,28 +192,22 @@
     /* ── Done banner ── */
     .done-banner {
       background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-      border: 1px solid #bbf7d0;
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      margin-top: 16px;
+      border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px;
+      text-align: center; margin-top: 16px;
     }
     .done-banner .done-icon { font-size: 32px; margin-bottom: 8px; }
     .done-banner h3 { font-size: 16px; font-weight: 700; color: #15803d; }
     .done-banner p { font-size: 13px; color: #166534; margin-top: 4px; }
 
-    /* ── Receiver ── */
-    .rx-waiting {
-      text-align: center;
-      padding: 32px 16px;
-    }
+    /* ── Receiver file list ── */
+    .rx-file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+
+    /* ── Receiver waiting ── */
+    .rx-waiting { text-align: center; padding: 32px 16px; }
     .rx-waiting .spinner {
-      width: 48px; height: 48px;
-      border: 3px solid var(--slate-100);
-      border-top-color: var(--blue);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
+      width: 48px; height: 48px; border: 3px solid var(--slate-100);
+      border-top-color: var(--blue); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 16px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .rx-waiting h3 { font-size: 15px; font-weight: 600; color: var(--slate-700); margin-bottom: 4px; }
@@ -233,13 +215,8 @@
 
     /* ── Error ── */
     .error-box {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 12px;
-      padding: 14px 16px;
-      font-size: 13px;
-      color: #dc2626;
-      margin-top: 12px;
+      background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px;
+      padding: 14px 16px; font-size: 13px; color: #dc2626; margin-top: 12px;
       display: flex; align-items: center; gap: 8px;
     }
 
@@ -250,7 +227,6 @@
 
     /* ── Footer ── */
     .footer { margin-top: 24px; text-align: center; font-size: 12px; color: var(--slate-400); }
-    .footer a { color: var(--slate-400); text-decoration: none; }
   </style>
 </head>
 <body>
@@ -265,6 +241,7 @@
     <span class="badge">🔒 End-to-end encrypted</span>
     <span class="badge">🚫 No server storage</span>
     <span class="badge">⚡ Direct P2P</span>
+    <span class="badge">📦 Multi-file</span>
   </div>
 </div>
 
@@ -275,26 +252,27 @@
     <div class="drop-zone" id="drop-zone">
       <div class="drop-zone-inner">
         <div class="drop-icon">📂</div>
-        <h3>Drop your file here</h3>
-        <p>or <strong>click to browse</strong> &nbsp;·&nbsp; Max 50MB</p>
+        <h3>Drop files here</h3>
+        <p>or <strong>click to browse</strong> &nbsp;·&nbsp; Multiple files · Max 50MB each</p>
       </div>
-      <input type="file" id="input-file" />
+      <input type="file" id="input-file" multiple />
     </div>
 
-    <div class="file-info hidden" id="file-info" style="margin-top:14px">
-      <div class="file-icon">📄</div>
-      <div class="file-meta">
-        <strong id="file-name"></strong>
-        <span id="file-size"></span>
+    <!-- File list (pre-send) -->
+    <div id="file-list-section" class="hidden">
+      <div class="file-list" id="file-list"></div>
+      <div class="file-list-summary" id="file-list-summary"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+        <button class="btn-sm" id="add-more-btn">＋ Add more</button>
+        <div style="flex:1"></div>
       </div>
     </div>
 
     <div style="margin-top:16px">
-      <button class="btn btn-primary" id="create-btn" disabled>
-        Select a file to continue
-      </button>
+      <button class="btn btn-primary" id="create-btn" disabled>Select files to continue</button>
     </div>
 
+    <!-- Room section (after room created) -->
     <div class="hidden" id="room-section">
       <div class="divider"></div>
       <div class="room-link-label" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--slate-400);margin-bottom:8px">Share this link with the receiver</div>
@@ -309,23 +287,27 @@
       </div>
     </div>
 
-    <div class="progress-section hidden" id="sender-progress">
+    <!-- Transfer progress -->
+    <div class="overall-progress hidden" id="sender-progress">
       <div class="divider"></div>
       <div class="progress-header">
-        <span class="progress-label">Sending file…</span>
+        <span class="progress-label" id="sender-progress-label">Sending files…</span>
         <span class="progress-pct" id="sender-pct">0%</span>
       </div>
       <div class="progress-track"><div class="progress-fill" id="sender-fill" style="width:0%"></div></div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Speed</div><div class="stat-value" id="sender-speed">—</div></div>
         <div class="stat-card"><div class="stat-label">ETA</div><div class="stat-value" id="sender-eta">—</div></div>
+        <div class="stat-card"><div class="stat-label">Files</div><div class="stat-value" id="sender-files-counter">—</div></div>
       </div>
+      <!-- Per-file progress rows shown here during transfer -->
+      <div class="file-list" id="sender-transfer-list" style="margin-top:12px"></div>
     </div>
 
     <div class="done-banner hidden" id="sender-done">
       <div class="done-icon">🎉</div>
-      <h3>Transfer Complete!</h3>
-      <p>File delivered and verified successfully.</p>
+      <h3>All Files Sent!</h3>
+      <p id="sender-done-sub">All files delivered and verified successfully.</p>
     </div>
   </div>
 
@@ -346,35 +328,28 @@
         <span id="rx-status"></span>
       </div>
 
-      <div class="file-info hidden" id="rx-file-info" style="margin:16px 0">
-        <div class="file-icon">📄</div>
-        <div class="file-meta">
-          <strong id="rx-file-name"></strong>
-          <span id="rx-file-size"></span>
-        </div>
-      </div>
-
-      <div class="progress-section hidden" id="rx-progress">
+      <!-- Overall RX progress -->
+      <div class="overall-progress hidden" id="rx-overall-progress">
         <div class="progress-header">
-          <span class="progress-label">Receiving file…</span>
+          <span class="progress-label" id="rx-progress-label">Receiving files…</span>
           <span class="progress-pct" id="rx-pct">0%</span>
         </div>
         <div class="progress-track"><div class="progress-fill" id="rx-fill" style="width:0%"></div></div>
         <div class="stats-grid">
           <div class="stat-card"><div class="stat-label">Speed</div><div class="stat-value" id="rx-speed">—</div></div>
           <div class="stat-card"><div class="stat-label">ETA</div><div class="stat-value" id="rx-eta">—</div></div>
+          <div class="stat-card"><div class="stat-label">Files</div><div class="stat-value" id="rx-files-counter">—</div></div>
         </div>
       </div>
 
+      <!-- Per-file list for receiver -->
+      <div class="rx-file-list" id="rx-file-list"></div>
+
       <div class="done-banner hidden" id="rx-done">
         <div class="done-icon">✅</div>
-        <h3>File Received!</h3>
-        <p id="rx-done-sub">SHA-256 verified — no corruption detected.</p>
+        <h3>All Files Received!</h3>
+        <p id="rx-done-sub">All files SHA-256 verified — no corruption detected.</p>
       </div>
-
-      <a id="download-btn" class="hidden">
-        <button class="btn btn-green">⬇ Download <span id="rx-dl-name"></span></button>
-      </a>
     </div>
 
     <div class="error-box hidden" id="rx-error">⚠️ <span id="rx-error-msg"></span></div>
@@ -382,14 +357,13 @@
 
 </div>
 
-<div class="footer">
-  Files transfer directly between browsers · Never stored on any server
-</div>
+<div class="footer">Files transfer directly between browsers · Never stored on any server</div>
 
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 const SERVER_URL = 'https://quickshare2qt.onrender.com';
 const CHUNK_SIZE = 64 * 1024;
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
 function fmt(bytes) {
   if (!bytes) return '0 B';
@@ -401,6 +375,15 @@ function fmt(bytes) {
 function fmtEta(s) {
   if (!s || s <= 0 || !isFinite(s)) return '—';
   return s < 60 ? `${Math.ceil(s)}s` : `${Math.floor(s/60)}m ${Math.ceil(s%60)}s`;
+}
+function fileEmoji(name) {
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  const map = { pdf:'📄', jpg:'🖼', jpeg:'🖼', png:'🖼', gif:'🖼', webp:'🖼', svg:'🖼',
+    mp4:'🎬', mov:'🎬', avi:'🎬', mkv:'🎬', mp3:'🎵', wav:'🎵', flac:'🎵',
+    zip:'🗜', rar:'🗜', '7z':'🗜', tar:'🗜', gz:'🗜',
+    js:'💻', ts:'💻', py:'💻', html:'💻', css:'💻', json:'💻', txt:'📝',
+    doc:'📝', docx:'📝', xls:'📊', xlsx:'📊', ppt:'📊', pptx:'📊' };
+  return map[ext] || '📁';
 }
 async function sha256(data) {
   const buf = await crypto.subtle.digest('SHA-256', data instanceof Blob ? await data.arrayBuffer() : data);
@@ -424,50 +407,104 @@ document.getElementById('receiver-view').classList.toggle('hidden', isSender);
 
 const socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
 
-// ══ SENDER ══
+// ══════════════════════════════════════════════════════════
+// SENDER
+// ══════════════════════════════════════════════════════════
 if (isSender) {
-  let selectedFile = null, roomId = null, pc = null, dc = null;
-  const MAX_SIZE = 50 * 1024 * 1024;
+  let selectedFiles = []; // array of File objects
+  let roomId = null, pc = null, dc = null;
 
   const dropZone  = document.getElementById('drop-zone');
   const fileInput = document.getElementById('input-file');
   const createBtn = document.getElementById('create-btn');
-  const fileInfo  = document.getElementById('file-info');
-  const roomSec   = document.getElementById('room-section');
+  const fileListSection = document.getElementById('file-list-section');
+  const fileListEl = document.getElementById('file-list');
+  const fileListSummary = document.getElementById('file-list-summary');
+  const roomSec = document.getElementById('room-section');
   const statusDot = document.getElementById('status-dot');
   const statusTxt = document.getElementById('status-text');
+  const addMoreBtn = document.getElementById('add-more-btn');
 
-  function setFile(f) {
-    if (f.size > MAX_SIZE) { alert(`File too large (${fmt(f.size)}). Maximum is 50MB.`); return; }
-    selectedFile = f;
-    document.getElementById('file-name').textContent = f.name;
-    document.getElementById('file-size').textContent = fmt(f.size);
-    fileInfo.classList.remove('hidden');
-    createBtn.disabled = false;
-    createBtn.textContent = '⚡ Create Room & Get Link';
+  function renderFileList() {
+    fileListEl.innerHTML = '';
+    selectedFiles.forEach((f, i) => {
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.dataset.index = i;
+      row.innerHTML = `
+        <div class="file-row-progress" id="pre-prog-${i}"></div>
+        <div class="file-row-icon">${fileEmoji(f.name)}</div>
+        <div class="file-row-meta">
+          <div class="file-row-name">${f.name}</div>
+          <div class="file-row-size">${fmt(f.size)}</div>
+        </div>
+        <span class="file-row-status pending" id="pre-status-${i}">Queued</span>
+        <button class="file-row-remove" data-index="${i}" title="Remove">✕</button>
+      `;
+      fileListEl.appendChild(row);
+    });
+
+    fileListEl.querySelectorAll('.file-row-remove').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const idx = parseInt(e.currentTarget.dataset.index);
+        selectedFiles.splice(idx, 1);
+        updateUI();
+      });
+    });
+
+    const totalSize = selectedFiles.reduce((s, f) => s + f.size, 0);
+    fileListSummary.textContent = selectedFiles.length > 0
+      ? `${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''} · ${fmt(totalSize)} total`
+      : '';
+
+    fileListSection.classList.toggle('hidden', selectedFiles.length === 0);
+    createBtn.disabled = selectedFiles.length === 0;
+    createBtn.textContent = selectedFiles.length === 0
+      ? 'Select files to continue'
+      : `⚡ Create Room & Share ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}`;
   }
+
+  function addFiles(newFiles) {
+    const oversized = [];
+    for (const f of newFiles) {
+      if (f.size > MAX_FILE_SIZE) { oversized.push(f.name); continue; }
+      // avoid duplicates by name+size
+      const dup = selectedFiles.some(x => x.name === f.name && x.size === f.size);
+      if (!dup) selectedFiles.push(f);
+    }
+    if (oversized.length) alert(`Skipped (>50MB):\n${oversized.join('\n')}`);
+    updateUI();
+  }
+
+  function updateUI() { renderFileList(); }
+
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('over');
+    if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]);
+  });
+  fileInput.addEventListener('change', e => {
+    if (e.target.files.length) { addFiles([...e.target.files]); fileInput.value = ''; }
+  });
+  addMoreBtn.addEventListener('click', () => fileInput.click());
 
   function setStatus(state) {
     const map = {
       waiting:    ['yellow', 'Waiting for receiver to join…'],
       connecting: ['blue',   'Establishing connection…'],
-      connected:  ['blue',   'Sending file…'],
+      connected:  ['blue',   'Sending files…'],
       failed:     ['red',    'Connection failed — please refresh'],
-      completed:  ['green',  'Transfer complete!'],
+      completed:  ['green',  'All transfers complete!'],
     };
     const [color, text] = map[state] || ['yellow', state];
     statusDot.className = `dot ${color}`;
     statusTxt.textContent = text;
   }
 
-  dropZone.addEventListener('click', () => fileInput.click());
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
-  dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('over'); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
-  fileInput.addEventListener('change', e => { if (e.target.files[0]) setFile(e.target.files[0]); });
-
   createBtn.addEventListener('click', () => {
-    if (!selectedFile) return;
+    if (!selectedFiles.length) return;
     createBtn.disabled = true;
     createBtn.textContent = 'Creating room…';
     socket.emit('create-room');
@@ -478,8 +515,8 @@ if (isSender) {
     document.getElementById('room-link').textContent = `${location.origin}/room/${id}`;
     roomSec.classList.remove('hidden');
     createBtn.classList.add('hidden');
-    fileInfo.classList.add('hidden');
     dropZone.classList.add('hidden');
+    fileListSection.classList.add('hidden');
     setStatus('waiting');
   });
 
@@ -498,15 +535,10 @@ if (isSender) {
     pc.onicecandidate = e => {
       if (e.candidate) socket.emit('ice-candidate', { roomId, candidate: e.candidate });
     };
-
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') setStatus('failed');
     };
-
-    dc.onopen = () => {
-      setStatus('connected');
-      startSending();
-    };
+    dc.onopen = () => { setStatus('connected'); startSendingAll(); };
 
     socket.on('answer', async answer => {
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
@@ -520,51 +552,120 @@ if (isSender) {
     socket.emit('offer', { roomId, offer });
   });
 
-  async function startSending() {
-    const file = selectedFile;
-    const hash = await sha256(file);
+  async function startSendingAll() {
+    const files = selectedFiles;
+    const totalSize = files.reduce((s, f) => s + f.size, 0);
+
+    // Build transfer UI
+    const transferList = document.getElementById('sender-transfer-list');
+    transferList.innerHTML = '';
+    files.forEach((f, i) => {
+      const row = document.createElement('div');
+      row.className = 'file-row';
+      row.innerHTML = `
+        <div class="file-row-progress" id="tx-prog-${i}"></div>
+        <div class="file-row-icon">${fileEmoji(f.name)}</div>
+        <div class="file-row-meta">
+          <div class="file-row-name">${f.name}</div>
+          <div class="file-row-size">${fmt(f.size)}</div>
+        </div>
+        <span class="file-row-status pending" id="tx-status-${i}">Queued</span>
+      `;
+      transferList.appendChild(row);
+    });
+
     document.getElementById('sender-progress').classList.remove('hidden');
-    dc.send(JSON.stringify({ type: 'meta', name: file.name, size: file.size, mime: file.type, hash }));
+    document.getElementById('sender-files-counter').textContent = `0 / ${files.length}`;
 
-    let offset = 0;
-    const start = Date.now();
+    // Send a session-start message so receiver knows total count
+    dc.send(JSON.stringify({ type: 'session-start', totalFiles: files.length, totalSize }));
 
-    function sendChunk() {
-      while (offset < file.size) {
-        if (dc.bufferedAmount > CHUNK_SIZE * 16) { setTimeout(sendChunk, 50); return; }
-        const slice = file.slice(offset, offset + CHUNK_SIZE);
-        slice.arrayBuffer().then(buf => {
-          dc.send(buf);
-          offset += buf.byteLength;
-          const elapsed = (Date.now() - start) / 1000;
-          const speed = elapsed > 0 ? offset / elapsed : 0;
-          const p = (offset / file.size) * 100;
-          document.getElementById('sender-fill').style.width = `${p}%`;
-          document.getElementById('sender-pct').textContent = `${p.toFixed(0)}%`;
-          document.getElementById('sender-speed').textContent = `${fmt(speed)}/s`;
-          document.getElementById('sender-eta').textContent = fmtEta((file.size - offset) / (speed || 1));
-          if (offset >= file.size) {
-            dc.send(JSON.stringify({ type: 'done' }));
-            document.getElementById('sender-done').classList.remove('hidden');
-            document.getElementById('sender-progress').classList.add('hidden');
-            setStatus('completed');
-          } else { sendChunk(); }
-        });
-        break;
-      }
+    let globalSent = 0;
+    const globalStart = Date.now();
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const statusEl = document.getElementById(`tx-status-${i}`);
+      const progEl   = document.getElementById(`tx-prog-${i}`);
+
+      statusEl.className = 'file-row-status sending';
+      statusEl.textContent = '0%';
+
+      // Pre-compute hash
+      const hash = await sha256(file);
+      dc.send(JSON.stringify({ type: 'meta', index: i, name: file.name, size: file.size, mime: file.type, hash }));
+
+      await new Promise((resolve) => {
+        let offset = 0;
+        const fileStart = Date.now();
+
+        function sendChunk() {
+          while (offset < file.size) {
+            if (dc.bufferedAmount > CHUNK_SIZE * 16) { setTimeout(sendChunk, 50); return; }
+            const slice = file.slice(offset, offset + CHUNK_SIZE);
+            slice.arrayBuffer().then(buf => {
+              dc.send(buf);
+              offset += buf.byteLength;
+              globalSent += buf.byteLength;
+
+              const filePct = (offset / file.size) * 100;
+              statusEl.textContent = `${filePct.toFixed(0)}%`;
+              progEl.style.width = `${filePct}%`;
+
+              const elapsed = (Date.now() - globalStart) / 1000;
+              const speed = elapsed > 0 ? globalSent / elapsed : 0;
+              const overallPct = (globalSent / totalSize) * 100;
+
+              document.getElementById('sender-fill').style.width = `${overallPct}%`;
+              document.getElementById('sender-pct').textContent = `${overallPct.toFixed(0)}%`;
+              document.getElementById('sender-speed').textContent = `${fmt(speed)}/s`;
+              document.getElementById('sender-eta').textContent = fmtEta((totalSize - globalSent) / (speed || 1));
+              document.getElementById('sender-files-counter').textContent = `${i} / ${files.length}`;
+              document.getElementById('sender-progress-label').textContent = `Sending: ${file.name}`;
+
+              if (offset >= file.size) {
+                dc.send(JSON.stringify({ type: 'file-done', index: i }));
+                statusEl.className = 'file-row-status done';
+                statusEl.textContent = '✓';
+                progEl.style.width = '100%';
+                document.getElementById('sender-files-counter').textContent = `${i + 1} / ${files.length}`;
+                resolve();
+              } else {
+                sendChunk();
+              }
+            });
+            break;
+          }
+        }
+        sendChunk();
+      });
     }
-    sendChunk();
+
+    // All done
+    dc.send(JSON.stringify({ type: 'all-done' }));
+    document.getElementById('sender-progress').classList.add('hidden');
+    document.getElementById('sender-done').classList.remove('hidden');
+    document.getElementById('sender-done-sub').textContent =
+      `${files.length} file${files.length > 1 ? 's' : ''} delivered and verified successfully.`;
+    setStatus('completed');
   }
 }
 
-// ══ RECEIVER ══
+// ══════════════════════════════════════════════════════════
+// RECEIVER
+// ══════════════════════════════════════════════════════════
 if (!isSender) {
-  let pc = null, chunks = [], meta = null, received = 0, startTime = null;
+  let pc = null;
+  // Per-file state
+  let currentMeta = null, currentChunks = [], currentReceived = 0, currentStart = null;
+  // Session state
+  let sessionTotal = 0, sessionTotalSize = 0, sessionReceived = 0, sessionReceivedSize = 0;
 
   const rxDot      = document.getElementById('rx-dot');
   const rxStatus   = document.getElementById('rx-status');
   const rxErrorBox = document.getElementById('rx-error');
   const rxErrorMsg = document.getElementById('rx-error-msg');
+  const rxFileList = document.getElementById('rx-file-list');
 
   function setRxWaiting(title, sub) {
     document.getElementById('rx-waiting-state').classList.remove('hidden');
@@ -578,10 +679,10 @@ if (!isSender) {
     document.getElementById('rx-transfer-state').classList.remove('hidden');
     const map = {
       connecting: ['blue',  'Establishing connection…'],
-      receiving:  ['blue',  'Receiving file…'],
-      done:       ['green', 'Transfer complete — SHA-256 verified ✓'],
+      receiving:  ['blue',  'Receiving files…'],
+      done:       ['green', 'All files received — SHA-256 verified ✓'],
       failed:     ['red',   'Connection failed. Please refresh.'],
-      error:      ['red',   'Verification failed — file may be corrupted.'],
+      error:      ['red',   'Verification failed on one or more files.'],
     };
     const [color, text] = map[state] || ['blue', state];
     rxDot.className = `dot ${color}`;
@@ -608,11 +709,11 @@ if (!isSender) {
       if (e.candidate) socket.emit('ice-candidate', { roomId: roomIdFromUrl, candidate: e.candidate });
     };
     pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-        setRxActive('failed');
-      }
+      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') setRxActive('failed');
     };
-    socket.on('ice-candidate', async c => { try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {} });
+    socket.on('ice-candidate', async c => {
+      try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {}
+    });
 
     pc.ondatachannel = e => {
       const ch = e.channel;
@@ -620,44 +721,103 @@ if (!isSender) {
       ch.onmessage = async ev => {
         if (typeof ev.data === 'string') {
           const msg = JSON.parse(ev.data);
-          if (msg.type === 'meta') {
-            meta = msg; received = 0; chunks = []; startTime = Date.now();
-            document.getElementById('rx-file-name').textContent = msg.name;
-            document.getElementById('rx-file-size').textContent = fmt(msg.size);
-            document.getElementById('rx-file-info').classList.remove('hidden');
-            document.getElementById('rx-progress').classList.remove('hidden');
-            document.getElementById('rx-dl-name').textContent = msg.name;
+
+          if (msg.type === 'session-start') {
+            sessionTotal = msg.totalFiles;
+            sessionTotalSize = msg.totalSize;
+            sessionReceived = 0;
+            sessionReceivedSize = 0;
+            rxFileList.innerHTML = '';
+            document.getElementById('rx-overall-progress').classList.remove('hidden');
+            document.getElementById('rx-files-counter').textContent = `0 / ${sessionTotal}`;
             setRxActive('receiving');
           }
-          if (msg.type === 'done') {
-            const blob = new Blob(chunks, { type: meta.mime });
+
+          if (msg.type === 'meta') {
+            currentMeta = msg;
+            currentChunks = [];
+            currentReceived = 0;
+            currentStart = Date.now();
+
+            // Add a row for this file
+            const row = document.createElement('div');
+            row.className = 'file-row';
+            row.id = `rx-row-${msg.index}`;
+            row.innerHTML = `
+              <div class="file-row-progress" id="rx-prog-${msg.index}"></div>
+              <div class="file-row-icon">${fileEmoji(msg.name)}</div>
+              <div class="file-row-meta">
+                <div class="file-row-name">${msg.name}</div>
+                <div class="file-row-size">${fmt(msg.size)}</div>
+              </div>
+              <span class="file-row-status sending" id="rx-fstatus-${msg.index}">0%</span>
+            `;
+            rxFileList.appendChild(row);
+
+            document.getElementById('rx-progress-label').textContent = `Receiving: ${msg.name}`;
+          }
+
+          if (msg.type === 'file-done') {
+            const blob = new Blob(currentChunks, { type: currentMeta.mime });
             const computedHash = await sha256(blob);
-            const verified = computedHash === meta.hash;
-            setRxActive(verified ? 'done' : 'error');
+            const verified = computedHash === currentMeta.hash;
+            const idx = currentMeta.index;
+
+            const statusEl = document.getElementById(`rx-fstatus-${idx}`);
+            const progEl   = document.getElementById(`rx-prog-${idx}`);
+
+            if (verified) {
+              statusEl.className = 'file-row-status done';
+              statusEl.textContent = '✓';
+              progEl.style.width = '100%';
+              // auto-download
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url; a.download = currentMeta.name; a.click();
+              // Add a download button too
+              const dlA = document.createElement('a');
+              dlA.href = url;
+              dlA.download = currentMeta.name;
+              dlA.style.cssText = 'position:relative;z-index:1;flex-shrink:0';
+              dlA.innerHTML = `<button class="btn-sm" style="background:#dcfce7;color:#15803d">⬇</button>`;
+              document.getElementById(`rx-row-${idx}`).appendChild(dlA);
+            } else {
+              statusEl.className = 'file-row-status error';
+              statusEl.textContent = '⚠️';
+            }
+
+            sessionReceived++;
+            document.getElementById('rx-files-counter').textContent = `${sessionReceived} / ${sessionTotal}`;
+          }
+
+          if (msg.type === 'all-done') {
             document.getElementById('rx-done').classList.remove('hidden');
-            if (!verified) document.getElementById('rx-done-sub').textContent = '⚠️ Hash mismatch — file may be corrupted.';
-            const url = URL.createObjectURL(blob);
-            const dlBtn = document.getElementById('download-btn');
-            dlBtn.href = url;
-            dlBtn.download = meta.name;
-            dlBtn.style.display = 'block';
-            dlBtn.classList.remove('hidden');
-            document.getElementById('rx-progress').classList.add('hidden');
-            // auto-trigger
-            const a = document.createElement('a');
-            a.href = url; a.download = meta.name; a.click();
+            document.getElementById('rx-done-sub').textContent =
+              `${sessionTotal} file${sessionTotal > 1 ? 's' : ''} SHA-256 verified — no corruption detected.`;
+            setRxActive('done');
           }
           return;
         }
-        chunks.push(ev.data);
-        received += ev.data.byteLength;
-        const elapsed = (Date.now() - startTime) / 1000;
-        const speed = elapsed > 0 ? received / elapsed : 0;
-        const p = (received / meta.size) * 100;
-        document.getElementById('rx-fill').style.width = `${p}%`;
-        document.getElementById('rx-pct').textContent = `${p.toFixed(0)}%`;
+
+        // Binary chunk
+        currentChunks.push(ev.data);
+        currentReceived += ev.data.byteLength;
+        sessionReceivedSize += ev.data.byteLength;
+
+        const filePct = (currentReceived / currentMeta.size) * 100;
+        const statusEl = document.getElementById(`rx-fstatus-${currentMeta.index}`);
+        const progEl   = document.getElementById(`rx-prog-${currentMeta.index}`);
+        if (statusEl) statusEl.textContent = `${filePct.toFixed(0)}%`;
+        if (progEl) progEl.style.width = `${filePct}%`;
+
+        const elapsed = (Date.now() - currentStart) / 1000;
+        const speed = elapsed > 0 ? sessionReceivedSize / elapsed : 0;
+        const overallPct = sessionTotalSize > 0 ? (sessionReceivedSize / sessionTotalSize) * 100 : 0;
+
+        document.getElementById('rx-fill').style.width = `${overallPct}%`;
+        document.getElementById('rx-pct').textContent = `${overallPct.toFixed(0)}%`;
         document.getElementById('rx-speed').textContent = `${fmt(speed)}/s`;
-        document.getElementById('rx-eta').textContent = fmtEta((meta.size - received) / (speed || 1));
+        document.getElementById('rx-eta').textContent = fmtEta((sessionTotalSize - sessionReceivedSize) / (speed || 1));
       };
     };
 
@@ -668,7 +828,7 @@ if (!isSender) {
   });
 
   socket.on('peer-disconnected', () => {
-    if (rxStatus && rxStatus.textContent.indexOf('complete') === -1) {
+    if (rxStatus && !rxStatus.textContent.includes('complete') && !rxStatus.textContent.includes('received')) {
       setRxActive('failed');
       rxErrorMsg.textContent = 'Sender disconnected.';
       rxErrorBox.classList.remove('hidden');
