@@ -724,9 +724,14 @@ if (isSender) {
 
     fileListSection.classList.toggle('hidden', selectedFiles.length === 0);
     createBtn.disabled = selectedFiles.length === 0;
-    createBtn.textContent = selectedFiles.length === 0
-      ? 'Select files to continue'
-      : `⚡ Create Room & Share ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}`;
+    const connected = dc && dc.readyState === 'open';
+    if (selectedFiles.length === 0) {
+      createBtn.textContent = connected ? 'Select files to send' : 'Select files to continue';
+    } else {
+      createBtn.textContent = connected
+        ? `⚡ Send ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}`
+        : `⚡ Create Room & Share ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}`;
+    }
   }
 
   function addFiles(newFiles) {
@@ -758,9 +763,9 @@ if (isSender) {
     const map = {
       waiting:    ['yellow', 'Waiting for receiver to join…'],
       connecting: ['blue',   'Establishing connection…'],
-      connected:  ['blue',   'Connected — ready to send'],
+      connected:  ['green',  'Connected — drop more files or text anytime'],
       failed:     ['red',    'Connection failed — please refresh'],
-      completed:  ['green',  'All transfers complete!'],
+      sending:    ['blue',   'Sending…'],
     };
     const [color, text] = map[state] || ['yellow', state];
     statusDot.className = `dot ${color}`;
@@ -769,6 +774,14 @@ if (isSender) {
 
   createBtn.addEventListener('click', () => {
     if (!selectedFiles.length) return;
+
+    // If already connected — just send the current batch
+    if (dc && dc.readyState === 'open') {
+      startSendingAll();
+      return;
+    }
+
+    // Otherwise create a new room
     createBtn.disabled = true;
     createBtn.textContent = 'Creating room…';
     socket.emit('create-room');
@@ -778,16 +791,11 @@ if (isSender) {
     roomId = id;
     document.getElementById('room-link').textContent = `${location.origin}/room/${id}`;
     roomSec.classList.remove('hidden');
-    createBtn.classList.add('hidden');
-    dropZone.classList.add('hidden');
-    fileListSection.classList.add('hidden');
 
-    // Show mode tabs in text mode after room creation (for text-only flow)
-    if (currentMode === 'text') {
-      document.getElementById('text-mode').classList.remove('hidden');
-      sendTextBtn.disabled = !textInput.value.trim();
-      sendTextBtn.textContent = textInput.value.trim() ? '⚡ Send Text' : 'Send Text';
-    }
+    // Keep drop zone + file list visible so sender can queue files while waiting
+    // Just swap the "Create Room" button to a disabled "Send" button
+    createBtn.textContent = 'Waiting for receiver…';
+    createBtn.disabled = true;
 
     setStatus('waiting');
   });
@@ -812,12 +820,16 @@ if (isSender) {
     };
     dc.onopen = () => {
       setStatus('connected');
-      // If text mode and pending send, fire it
+      // Unlock the send button — room is live, receiver is connected
+      createBtn.textContent = selectedFiles.length
+        ? `⚡ Send ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}`
+        : 'Select files to send';
+      createBtn.disabled = selectedFiles.length === 0;
+
+      // If text mode with pending send, fire it
       if (pendingTextSend) {
         doSendText(pendingTextSend);
         pendingTextSend = null;
-      } else if (currentMode === 'files') {
-        startSendingAll();
       }
     };
 
@@ -836,6 +848,10 @@ if (isSender) {
   async function startSendingAll() {
     const files = selectedFiles;
     const totalSize = files.reduce((s, f) => s + f.size, 0);
+
+    // Lock UI during transfer
+    createBtn.disabled = true;
+    createBtn.textContent = `Sending…`;
 
     const transferList = document.getElementById('sender-transfer-list');
     transferList.innerHTML = '';
@@ -856,6 +872,7 @@ if (isSender) {
 
     document.getElementById('sender-progress').classList.remove('hidden');
     document.getElementById('sender-files-counter').textContent = `0 / ${files.length}`;
+    setStatus('sending');
 
     dc.send(JSON.stringify({ type: 'session-start', totalFiles: files.length, totalSize }));
 
@@ -923,10 +940,20 @@ if (isSender) {
 
     dc.send(JSON.stringify({ type: 'all-done' }));
     document.getElementById('sender-progress').classList.add('hidden');
-    document.getElementById('sender-done').classList.remove('hidden');
+
+    // Show a brief done banner
+    const doneBanner = document.getElementById('sender-done');
+    doneBanner.classList.remove('hidden');
     document.getElementById('sender-done-sub').textContent =
       `${files.length} file${files.length > 1 ? 's' : ''} delivered and verified successfully.`;
-    setStatus('completed');
+    setStatus('connected');
+
+    // Clear queue and re-enable the UI for another send after a short delay
+    setTimeout(() => {
+      selectedFiles = [];
+      updateUI(); // re-renders file list and resets button to "Select files to send"
+      doneBanner.classList.add('hidden');
+    }, 3000);
   }
 }
 
@@ -1134,10 +1161,22 @@ if (!isSender) {
           }
 
           else if (msg.type === 'all-done') {
-            document.getElementById('rx-done').classList.remove('hidden');
+            const rxDoneBanner = document.getElementById('rx-done');
+            rxDoneBanner.classList.remove('hidden');
             document.getElementById('rx-done-sub').textContent =
               `${sessionTotal} file${sessionTotal > 1 ? 's' : ''} SHA-256 verified — no corruption detected.`;
             setRxActive('done');
+            // Auto-dismiss after 3s and reset progress bar, ready for next batch
+            setTimeout(() => {
+              rxDoneBanner.classList.add('hidden');
+              document.getElementById('rx-overall-progress').classList.add('hidden');
+              document.getElementById('rx-fill').style.width = '0%';
+              document.getElementById('rx-pct').textContent = '0%';
+              document.getElementById('rx-speed').textContent = '—';
+              document.getElementById('rx-eta').textContent = '—';
+              rxDot.className = 'dot green';
+              rxStatus.textContent = 'Ready — waiting for more files';
+            }, 3000);
           }
 
           return;
