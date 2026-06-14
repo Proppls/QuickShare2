@@ -166,6 +166,3 @@ const SERVER_URL = 'http://localhost:4000';
 
 ---
 
-## 📄 License
-
-MIT — free to use, modify, and distribute.
