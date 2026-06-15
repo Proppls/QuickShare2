@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QuickShare2 — Instant P2P File Transfer</title>
+  <title>QuickShare2 — Swarm P2P File Transfer</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -15,9 +15,11 @@
       --green: #22c55e;
       --red: #ef4444;
       --yellow: #f59e0b;
+      --purple: #8b5cf6;
       --slate-50: #f8fafc;
       --slate-100: #f1f5f9;
       --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
       --slate-400: #94a3b8;
       --slate-500: #64748b;
       --slate-700: #334155;
@@ -59,7 +61,7 @@
     .card {
       background: white; border-radius: 20px;
       box-shadow: 0 8px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
-      padding: 36px; max-width: 520px; width: 100%;
+      padding: 36px; max-width: 540px; width: 100%;
     }
 
     /* ── Drop zone ── */
@@ -133,6 +135,70 @@
       font-size: 12px; color: var(--slate-400); margin-top: 6px; text-align: right;
     }
 
+    /* ── Swarm visualization ── */
+    .swarm-panel {
+      background: linear-gradient(135deg, #f0f9ff, #faf5ff);
+      border: 1px solid #bfdbfe; border-radius: 14px;
+      padding: 16px; margin: 16px 0;
+    }
+    .swarm-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .swarm-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--blue);
+    }
+    .swarm-count {
+      background: var(--blue); color: white; font-size: 10px; font-weight: 700;
+      border-radius: 99px; padding: 2px 8px;
+    }
+    .swarm-nodes {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    }
+    .swarm-node {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .swarm-node-circle {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700;
+      border: 2px solid transparent;
+      transition: all .3s ease;
+    }
+    .swarm-node-circle.sender  { background: linear-gradient(135deg, #dbeafe, #ede9fe); border-color: #93c5fd; }
+    .swarm-node-circle.seeder  { background: linear-gradient(135deg, #dcfce7, #d1fae5); border-color: #86efac; }
+    .swarm-node-circle.leecher { background: linear-gradient(135deg, #fef9c3, #fef3c7); border-color: #fde68a; }
+    .swarm-node-circle.self    { box-shadow: 0 0 0 3px rgba(59,130,246,0.3); }
+    .swarm-node-label {
+      font-size: 10px; font-weight: 600; color: var(--slate-500);
+      text-align: center; max-width: 48px; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .swarm-connector {
+      font-size: 14px; color: var(--slate-300); align-self: center; margin-bottom: 16px;
+    }
+
+    /* ── Swarm segment progress bar (striped, per-source) ── */
+    .segment-bar-wrap {
+      margin-top: 10px;
+    }
+    .segment-bar-label {
+      font-size: 11px; font-weight: 600; color: var(--slate-500); margin-bottom: 4px;
+    }
+    .segment-bar {
+      height: 10px; background: var(--slate-100); border-radius: 99px;
+      overflow: hidden; display: flex; position: relative;
+    }
+    .segment-bar-fill {
+      height: 100%; border-radius: 99px; transition: width .2s ease;
+      position: absolute; top: 0;
+    }
+    .seg-color-0 { background: linear-gradient(90deg, #3b82f6, #6366f1); }
+    .seg-color-1 { background: linear-gradient(90deg, #22c55e, #16a34a); }
+    .seg-color-2 { background: linear-gradient(90deg, #f59e0b, #d97706); }
+    .seg-color-3 { background: linear-gradient(90deg, #ec4899, #db2777); }
+
     /* ── Buttons ── */
     .btn {
       width: 100%; padding: 14px; border: none; border-radius: 12px;
@@ -145,8 +211,6 @@
     .btn-primary:disabled { background: var(--slate-200); color: var(--slate-400); box-shadow: none; cursor: not-allowed; transform: none; }
     .btn-dark { background: var(--slate-900); color: white; margin-top: 8px; }
     .btn-dark:hover { background: var(--slate-700); }
-    .btn-green { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; box-shadow: 0 4px 12px rgba(34,197,94,0.3); margin-top: 8px; }
-    .btn-green:hover { box-shadow: 0 6px 16px rgba(34,197,94,0.4); transform: translateY(-1px); }
     .btn-sm {
       width: auto; padding: 8px 14px; font-size: 13px; border: none; border-radius: 8px;
       font-weight: 600; cursor: pointer; transition: all .15s ease;
@@ -175,6 +239,7 @@
     .dot.blue   { background: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); animation: pulse 1.2s infinite; }
     .dot.green  { background: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
     .dot.red    { background: var(--red); box-shadow: 0 0 0 3px rgba(239,68,68,0.2); }
+    .dot.purple { background: var(--purple); box-shadow: 0 0 0 3px rgba(139,92,246,0.2); animation: pulse 1.2s infinite; }
     @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.3 } }
 
     /* ── Overall progress ── */
@@ -323,11 +388,11 @@
     <div class="logo-icon">⚡</div>
     QuickShare2
   </div>
-  <p class="tagline">Instant browser-to-browser file transfer</p>
+  <p class="tagline">Instant swarm P2P file transfer</p>
   <div class="badges">
     <span class="badge">🔒 End-to-end encrypted</span>
     <span class="badge">🚫 No server storage</span>
-    <span class="badge">⚡ Direct P2P</span>
+    <span class="badge">🔀 Mesh swarming</span>
     <span class="badge">📦 Multi-file</span>
   </div>
 </div>
@@ -345,29 +410,27 @@
 
     <!-- File mode -->
     <div id="file-mode">
-    <div class="drop-zone" id="drop-zone">
-      <div class="drop-zone-inner">
-        <div class="drop-icon">📂</div>
-        <h3>Drop files here</h3>
-        <p>or <strong>click to browse</strong> &nbsp;·&nbsp; Multiple files · Max 50MB each</p>
+      <div class="drop-zone" id="drop-zone">
+        <div class="drop-zone-inner">
+          <div class="drop-icon">📂</div>
+          <h3>Drop files here</h3>
+          <p>or <strong>click to browse</strong> &nbsp;·&nbsp; Multiple files · Max 50MB each</p>
+        </div>
+        <input type="file" id="input-file" multiple />
       </div>
-      <input type="file" id="input-file" multiple />
-    </div>
 
-    <!-- File list (pre-send) -->
-    <div id="file-list-section" class="hidden">
-      <div class="file-list" id="file-list"></div>
-      <div class="file-list-summary" id="file-list-summary"></div>
-      <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
-        <button class="btn-sm" id="add-more-btn">＋ Add more</button>
-        <div style="flex:1"></div>
+      <div id="file-list-section" class="hidden">
+        <div class="file-list" id="file-list"></div>
+        <div class="file-list-summary" id="file-list-summary"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+          <button class="btn-sm" id="add-more-btn">＋ Add more</button>
+        </div>
+      </div>
+
+      <div style="margin-top:16px">
+        <button class="btn btn-primary" id="create-btn" disabled>Select files to continue</button>
       </div>
     </div>
-
-    <div style="margin-top:16px">
-      <button class="btn btn-primary" id="create-btn" disabled>Select files to continue</button>
-    </div>
-    </div><!-- end #file-mode -->
 
     <!-- Text mode -->
     <div id="text-mode" class="hidden">
@@ -381,12 +444,22 @@
     <!-- Room section (after room created) -->
     <div class="hidden" id="room-section">
       <div class="divider"></div>
-      <div class="room-link-label" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--slate-400);margin-bottom:8px">Share this link with the receiver</div>
+      <div class="room-link-label" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--slate-400);margin-bottom:8px">Share this link — anyone can join the swarm</div>
       <div class="room-link-box">
         <div class="room-link-label">Invite Link</div>
         <div class="room-link-url" id="room-link"></div>
       </div>
       <button class="btn btn-dark" id="copy-btn">📋 Copy Link</button>
+
+      <!-- Swarm panel -->
+      <div class="swarm-panel hidden" id="sender-swarm-panel">
+        <div class="swarm-header">
+          <span class="swarm-title">🔀 Swarm</span>
+          <span class="swarm-count" id="sender-swarm-count">1 peer</span>
+        </div>
+        <div class="swarm-nodes" id="sender-swarm-nodes"></div>
+      </div>
+
       <div class="status-bar" id="status-bar" style="margin-top:16px">
         <div class="dot" id="status-dot"></div>
         <span id="status-text"></span>
@@ -406,14 +479,13 @@
         <div class="stat-card"><div class="stat-label">ETA</div><div class="stat-value" id="sender-eta">—</div></div>
         <div class="stat-card"><div class="stat-label">Files</div><div class="stat-value" id="sender-files-counter">—</div></div>
       </div>
-      <!-- Per-file progress rows shown here during transfer -->
       <div class="file-list" id="sender-transfer-list" style="margin-top:12px"></div>
     </div>
 
     <div class="done-banner hidden" id="sender-done">
       <div class="done-icon">🎉</div>
       <h3>All Files Sent!</h3>
-      <p id="sender-done-sub">All files delivered and verified successfully.</p>
+      <p id="sender-done-sub">All files delivered successfully.</p>
     </div>
 
     <!-- Transfer History -->
@@ -439,12 +511,26 @@
     <div id="rx-waiting-state">
       <div class="rx-waiting">
         <div class="spinner"></div>
-        <h3 id="rx-status-title">Joining room…</h3>
+        <h3 id="rx-status-title">Joining swarm…</h3>
         <p id="rx-status-sub">Please wait</p>
       </div>
     </div>
 
     <div class="hidden" id="rx-transfer-state">
+      <!-- Swarm panel for receiver -->
+      <div class="swarm-panel hidden" id="rx-swarm-panel">
+        <div class="swarm-header">
+          <span class="swarm-title">🔀 Swarm</span>
+          <span class="swarm-count" id="rx-swarm-count">1 peer</span>
+        </div>
+        <div class="swarm-nodes" id="rx-swarm-nodes"></div>
+        <!-- Segment bar shows which peers are serving which parts -->
+        <div class="segment-bar-wrap hidden" id="rx-segment-wrap">
+          <div class="segment-bar-label">Download sources</div>
+          <div class="segment-bar" id="rx-segment-bar"></div>
+        </div>
+      </div>
+
       <div class="status-bar">
         <div class="dot" id="rx-dot"></div>
         <span id="rx-status"></span>
@@ -464,13 +550,12 @@
         </div>
       </div>
 
-      <!-- Per-file list for receiver -->
       <div class="rx-file-list" id="rx-file-list"></div>
 
       <div class="done-banner hidden" id="rx-done">
         <div class="done-icon">✅</div>
         <h3>All Files Received!</h3>
-        <p id="rx-done-sub">All files SHA-256 verified — no corruption detected.</p>
+        <p id="rx-done-sub">SHA-256 verified — swarmed from multiple peers.</p>
       </div>
 
       <!-- Receiver Transfer History -->
@@ -495,14 +580,15 @@
 
 </div>
 
-<div class="footer">Files transfer directly between browsers · Never stored on any server</div>
+<div class="footer">Files transfer directly between browsers · Mesh swarming — never stored on any server</div>
 
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 const SERVER_URL = 'https://quickshare2qt.onrender.com';
-const CHUNK_SIZE = 64 * 1024;
+const CHUNK_SIZE = 64 * 1024;         // 64 KB data channel chunks
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
+// ── Utilities ────────────────────────────────────────────────────────────────
 function fmt(bytes) {
   if (!bytes) return '0 B';
   const u = ['B','KB','MB','GB'];
@@ -535,8 +621,9 @@ async function getIceServers() {
     return [{ urls: 'stun:stun.l.google.com:19302' }];
   }
 }
+function shortId(id) { return id ? id.slice(-4).toUpperCase() : '????'; }
 
-// ── History helpers ──────────────────────────────────────
+// ── History helpers ──────────────────────────────────────────────────────────
 function setupHistoryToggle(toggleId, bodyId, chevronId) {
   let open = true;
   document.getElementById(toggleId).addEventListener('click', () => {
@@ -545,18 +632,13 @@ function setupHistoryToggle(toggleId, bodyId, chevronId) {
     document.getElementById(chevronId).classList.toggle('open', open);
   });
 }
-
 function addFileToHistory(listId, countId, sectionId, name, size, blobUrl, verified) {
-  const section = document.getElementById(sectionId);
-  section.classList.remove('hidden');
+  document.getElementById(sectionId).classList.remove('hidden');
   const list = document.getElementById(listId);
-  // Remove empty placeholder
   const empty = list.querySelector('.history-empty');
   if (empty) empty.remove();
-
   const count = document.getElementById(countId);
   count.textContent = parseInt(count.textContent || '0') + 1;
-
   const item = document.createElement('div');
   item.className = 'history-item';
   const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -573,17 +655,13 @@ function addFileToHistory(listId, countId, sectionId, name, size, blobUrl, verif
   list.appendChild(item);
   list.scrollTop = list.scrollHeight;
 }
-
 function addTextToHistory(listId, countId, sectionId, text) {
-  const section = document.getElementById(sectionId);
-  section.classList.remove('hidden');
+  document.getElementById(sectionId).classList.remove('hidden');
   const list = document.getElementById(listId);
   const empty = list.querySelector('.history-empty');
   if (empty) empty.remove();
-
   const count = document.getElementById(countId);
   count.textContent = parseInt(count.textContent || '0') + 1;
-
   const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const item = document.createElement('div');
   item.className = 'history-item';
@@ -602,7 +680,6 @@ function addTextToHistory(listId, countId, sectionId, text) {
   list.appendChild(item);
   list.scrollTop = list.scrollHeight;
 }
-
 function copyHistoryText(btn, text) {
   navigator.clipboard.writeText(text);
   btn.textContent = '✓ Copied';
@@ -610,7 +687,7 @@ function copyHistoryText(btn, text) {
   setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
 }
 
-// ── Mode switching (sender only) ──────────────────────────
+// ── Mode switching ───────────────────────────────────────────────────────────
 let currentMode = 'files';
 function switchMode(mode) {
   currentMode = mode;
@@ -620,6 +697,7 @@ function switchMode(mode) {
   document.getElementById('tab-text').classList.toggle('active', mode === 'text');
 }
 
+// ── Routing ──────────────────────────────────────────────────────────────────
 const roomIdFromUrl = location.pathname.startsWith('/room/')
   ? location.pathname.split('/room/')[1] : null;
 const isSender = !roomIdFromUrl;
@@ -629,59 +707,95 @@ document.getElementById('receiver-view').classList.toggle('hidden', isSender);
 
 const socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
 
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 // SENDER
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
 if (isSender) {
   let selectedFiles = [];
-  let roomId = null, pc = null, dc = null;
+  let roomId = null;
+  let mySocketId = null;
 
-  const dropZone  = document.getElementById('drop-zone');
-  const fileInput = document.getElementById('input-file');
-  const createBtn = document.getElementById('create-btn');
+  // peerConns: Map<peerId, { pc: RTCPeerConnection, dc: RTCDataChannel, role: string }>
+  const peerConns = new Map();
+
+  // Cache of file ArrayBuffers so we can serve range requests from seeders
+  // fileBuffers: Map<fileIndex, ArrayBuffer>
+  const fileBuffers = new Map();
+
+  const dropZone   = document.getElementById('drop-zone');
+  const fileInput  = document.getElementById('input-file');
+  const createBtn  = document.getElementById('create-btn');
   const fileListSection = document.getElementById('file-list-section');
   const fileListEl = document.getElementById('file-list');
   const fileListSummary = document.getElementById('file-list-summary');
-  const roomSec = document.getElementById('room-section');
-  const statusDot = document.getElementById('status-dot');
-  const statusTxt = document.getElementById('status-text');
+  const roomSec    = document.getElementById('room-section');
+  const statusDot  = document.getElementById('status-dot');
+  const statusTxt  = document.getElementById('status-text');
   const addMoreBtn = document.getElementById('add-more-btn');
-  const textInput = document.getElementById('text-input');
+  const textInput  = document.getElementById('text-input');
   const sendTextBtn = document.getElementById('send-text-btn');
   const textCharNum = document.getElementById('text-char-num');
 
+  // Swarm display
+  // swarmPeers: Map<peerId, { role: 'sender'|'receiver'|'seeder', label }>
+  const swarmPeers = new Map();
+
+  socket.on('connect', () => { mySocketId = socket.id; });
+
   setupHistoryToggle('sender-history-toggle', 'sender-history-body', 'sender-history-chevron');
 
-  // Text input char counter + button enable
+  function updateSwarmUI(panelId, nodesId, countId) {
+    const panel = document.getElementById(panelId);
+    const nodesEl = document.getElementById(nodesId);
+    const countEl = document.getElementById(countId);
+    panel.classList.remove('hidden');
+    countEl.textContent = `${swarmPeers.size} peer${swarmPeers.size !== 1 ? 's' : ''}`;
+    nodesEl.innerHTML = '';
+    let first = true;
+    for (const [pid, info] of swarmPeers) {
+      if (!first) {
+        const conn = document.createElement('div');
+        conn.className = 'swarm-connector';
+        conn.textContent = '⟷';
+        nodesEl.appendChild(conn);
+      }
+      first = false;
+      const node = document.createElement('div');
+      node.className = 'swarm-node';
+      const isSelf = pid === mySocketId;
+      node.innerHTML = `
+        <div class="swarm-node-circle ${info.role} ${isSelf ? 'self' : ''}">
+          ${info.role === 'sender' ? '📤' : info.role === 'seeder' ? '🌱' : '⬇'}
+        </div>
+        <div class="swarm-node-label">${isSelf ? 'You' : shortId(pid)}</div>
+      `;
+      nodesEl.appendChild(node);
+    }
+  }
+
+  // Text input
   textInput.addEventListener('input', () => {
     const len = textInput.value.length;
     textCharNum.textContent = len.toLocaleString();
     sendTextBtn.disabled = len === 0;
-    sendTextBtn.textContent = len === 0 ? 'Send Text' : `⚡ Send Text${roomId ? '' : ' (create room first)'}`;
   });
-
-  // Send text button — if no room yet, create one first then send
   sendTextBtn.addEventListener('click', async () => {
     const text = textInput.value.trim();
     if (!text) return;
-    if (!dc || dc.readyState !== 'open') {
-      // Need to create room first
-      if (!roomId) {
-        sendTextBtn.disabled = true;
-        sendTextBtn.textContent = 'Creating room…';
-        socket.emit('create-room');
-        // Will auto-send after connection established — store intent
-        pendingTextSend = text;
-      }
+    if (peerConns.size === 0 || !roomId) {
+      let pendingText = text;
+      socket.emit('create-room');
+      socket.once('room-created', () => broadcastText(pendingText));
       return;
     }
-    doSendText(text);
+    broadcastText(text);
   });
-
-  let pendingTextSend = null;
-
-  function doSendText(text) {
-    dc.send(JSON.stringify({ type: 'text-message', text }));
+  function broadcastText(text) {
+    for (const [, conn] of peerConns) {
+      if (conn.dc && conn.dc.readyState === 'open') {
+        conn.dc.send(JSON.stringify({ type: 'text-message', text }));
+      }
+    }
     addTextToHistory('sender-history-list', 'sender-history-count', 'sender-history-section', text);
     textInput.value = '';
     textCharNum.textContent = '0';
@@ -690,6 +804,7 @@ if (isSender) {
     setTimeout(() => { sendTextBtn.textContent = 'Send Text'; }, 2000);
   }
 
+  // File list UI
   function renderFileList() {
     fileListEl.innerHTML = '';
     selectedFiles.forEach((f, i) => {
@@ -708,64 +823,55 @@ if (isSender) {
       `;
       fileListEl.appendChild(row);
     });
-
     fileListEl.querySelectorAll('.file-row-remove').forEach(btn => {
       btn.addEventListener('click', e => {
         const idx = parseInt(e.currentTarget.dataset.index);
         selectedFiles.splice(idx, 1);
-        updateUI();
+        renderFileList();
+        updateCreateBtn();
       });
     });
-
     const totalSize = selectedFiles.reduce((s, f) => s + f.size, 0);
     fileListSummary.textContent = selectedFiles.length > 0
-      ? `${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''} · ${fmt(totalSize)} total`
-      : '';
-
+      ? `${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''} · ${fmt(totalSize)} total` : '';
     fileListSection.classList.toggle('hidden', selectedFiles.length === 0);
+  }
+  function updateCreateBtn() {
+    const anyOpen = [...peerConns.values()].some(c => c.dc && c.dc.readyState === 'open');
     createBtn.disabled = selectedFiles.length === 0;
-    const connected = dc && dc.readyState === 'open';
     if (selectedFiles.length === 0) {
-      createBtn.textContent = connected ? 'Select files to send' : 'Select files to continue';
+      createBtn.textContent = anyOpen ? 'Select files to send' : 'Select files to continue';
     } else {
-      createBtn.textContent = connected
-        ? `⚡ Send ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}`
-        : `⚡ Create Room & Share ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}`;
+      createBtn.textContent = anyOpen
+        ? `⚡ Send to ${peerConns.size} peer${peerConns.size !== 1 ? 's' : ''}`
+        : `⚡ Create Room & Share`;
     }
   }
-
   function addFiles(newFiles) {
     const oversized = [];
     for (const f of newFiles) {
       if (f.size > MAX_FILE_SIZE) { oversized.push(f.name); continue; }
-      const dup = selectedFiles.some(x => x.name === f.name && x.size === f.size);
-      if (!dup) selectedFiles.push(f);
+      if (!selectedFiles.some(x => x.name === f.name && x.size === f.size)) selectedFiles.push(f);
     }
     if (oversized.length) alert(`Skipped (>50MB):\n${oversized.join('\n')}`);
-    updateUI();
+    renderFileList();
+    updateCreateBtn();
   }
-
-  function updateUI() { renderFileList(); }
 
   dropZone.addEventListener('click', () => fileInput.click());
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault(); dropZone.classList.remove('over');
-    if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]);
-  });
-  fileInput.addEventListener('change', e => {
-    if (e.target.files.length) { addFiles([...e.target.files]); fileInput.value = ''; }
-  });
+  dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('over'); if (e.dataTransfer.files.length) addFiles([...e.dataTransfer.files]); });
+  fileInput.addEventListener('change', e => { if (e.target.files.length) { addFiles([...e.target.files]); fileInput.value = ''; } });
   addMoreBtn.addEventListener('click', () => fileInput.click());
 
   function setStatus(state) {
     const map = {
-      waiting:    ['yellow', 'Waiting for receiver to join…'],
-      connecting: ['blue',   'Establishing connection…'],
-      connected:  ['green',  'Connected — drop more files or text anytime'],
+      waiting:    ['yellow', 'Waiting for peers to join…'],
+      connecting: ['blue',   'Establishing swarm connections…'],
+      connected:  ['green',  `${peerConns.size} peer${peerConns.size !== 1 ? 's' : ''} connected`],
       failed:     ['red',    'Connection failed — please refresh'],
-      sending:    ['blue',   'Sending…'],
+      sending:    ['blue',   'Sending to swarm…'],
     };
     const [color, text] = map[state] || ['yellow', state];
     statusDot.className = `dot ${color}`;
@@ -774,14 +880,8 @@ if (isSender) {
 
   createBtn.addEventListener('click', () => {
     if (!selectedFiles.length) return;
-
-    // If already connected — just send the current batch
-    if (dc && dc.readyState === 'open') {
-      startSendingAll();
-      return;
-    }
-
-    // Otherwise create a new room
+    const anyOpen = [...peerConns.values()].some(c => c.dc && c.dc.readyState === 'open');
+    if (anyOpen) { startSendingAll(); return; }
     createBtn.disabled = true;
     createBtn.textContent = 'Creating room…';
     socket.emit('create-room');
@@ -789,15 +889,14 @@ if (isSender) {
 
   socket.on('room-created', ({ roomId: id }) => {
     roomId = id;
+    mySocketId = socket.id;
+    swarmPeers.set(socket.id, { role: 'sender', label: 'You' });
     document.getElementById('room-link').textContent = `${location.origin}/room/${id}`;
     roomSec.classList.remove('hidden');
-
-    // Keep drop zone + file list visible so sender can queue files while waiting
-    // Just swap the "Create Room" button to a disabled "Send" button
-    createBtn.textContent = 'Waiting for receiver…';
+    createBtn.textContent = 'Waiting for peers…';
     createBtn.disabled = true;
-
     setStatus('waiting');
+    updateSwarmUI('sender-swarm-panel', 'sender-swarm-nodes', 'sender-swarm-count');
   });
 
   document.getElementById('copy-btn').addEventListener('click', function() {
@@ -806,53 +905,165 @@ if (isSender) {
     setTimeout(() => this.textContent = '📋 Copy Link', 2000);
   });
 
-  socket.on('peer-joined', async () => {
+  // ── A new peer joined the swarm ─────────────────────────────────────────
+  socket.on('swarm-peer-joined', async ({ newPeerId, swarmSize }) => {
+    console.log(`Swarm: new peer ${newPeerId}, size=${swarmSize}`);
     setStatus('connecting');
+    swarmPeers.set(newPeerId, { role: 'receiver' });
+    updateSwarmUI('sender-swarm-panel', 'sender-swarm-nodes', 'sender-swarm-count');
+
+    // Sender is always the offerer toward new peers
+    await openPeerConnection(newPeerId, true);
+  });
+
+  // ── Incoming answer from a peer we offered to ────────────────────────────
+  socket.on('answer', async ({ fromId, answer }) => {
+    const conn = peerConns.get(fromId);
+    if (conn) await conn.pc.setRemoteDescription(new RTCSessionDescription(answer));
+  });
+
+  // ── ICE candidates ───────────────────────────────────────────────────────
+  socket.on('ice-candidate', async ({ fromId, candidate }) => {
+    const conn = peerConns.get(fromId);
+    if (conn) { try { await conn.pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {} }
+  });
+
+  socket.on('peer-promoted', ({ peerId }) => {
+    if (swarmPeers.has(peerId)) {
+      swarmPeers.get(peerId).role = 'seeder';
+      updateSwarmUI('sender-swarm-panel', 'sender-swarm-nodes', 'sender-swarm-count');
+    }
+  });
+
+  socket.on('peer-disconnected', ({ peerId }) => {
+    peerConns.get(peerId)?.pc.close();
+    peerConns.delete(peerId);
+    swarmPeers.delete(peerId);
+    updateSwarmUI('sender-swarm-panel', 'sender-swarm-nodes', 'sender-swarm-count');
+    const anyOpen = [...peerConns.values()].some(c => c.dc && c.dc.readyState === 'open');
+    if (anyOpen) setStatus('connected');
+    else { setStatus('waiting'); updateCreateBtn(); }
+  });
+
+  // ── Open a WebRTC connection to a peer ──────────────────────────────────
+  async function openPeerConnection(peerId, isOfferer) {
+    if (peerConns.has(peerId)) return;
     const iceServers = await getIceServers();
-    pc = new RTCPeerConnection({ iceServers });
-    dc = pc.createDataChannel('file', { ordered: true });
+    const pc = new RTCPeerConnection({ iceServers });
+
+    let dc;
+    if (isOfferer) {
+      dc = pc.createDataChannel('qs', { ordered: true });
+      setupSenderDataChannel(dc, peerId);
+    } else {
+      pc.ondatachannel = e => {
+        dc = e.channel;
+        peerConns.get(peerId).dc = dc;
+        setupSenderDataChannel(dc, peerId);
+      };
+    }
 
     pc.onicecandidate = e => {
-      if (e.candidate) socket.emit('ice-candidate', { roomId, candidate: e.candidate });
+      if (e.candidate) socket.emit('ice-candidate', { roomId, targetId: peerId, candidate: e.candidate });
     };
     pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') setStatus('failed');
-    };
-    dc.onopen = () => {
-      setStatus('connected');
-      // Unlock the send button — room is live, receiver is connected
-      createBtn.textContent = selectedFiles.length
-        ? `⚡ Send ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}`
-        : 'Select files to send';
-      createBtn.disabled = selectedFiles.length === 0;
-
-      // If text mode with pending send, fire it
-      if (pendingTextSend) {
-        doSendText(pendingTextSend);
-        pendingTextSend = null;
+      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+        peerConns.delete(peerId);
       }
     };
 
-    socket.on('answer', async answer => {
-      await pc.setRemoteDescription(new RTCSessionDescription(answer));
-    });
-    socket.on('ice-candidate', async candidate => {
-      try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {}
-    });
+    peerConns.set(peerId, { pc, dc: dc || null, role: 'receiver' });
 
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    socket.emit('offer', { roomId, offer });
-  });
+    if (isOfferer) {
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      socket.emit('offer', { roomId, targetId: peerId, offer });
+    }
 
+    return pc;
+  }
+
+  // ── DataChannel setup for sender side ───────────────────────────────────
+  function setupSenderDataChannel(dc, peerId) {
+    dc.binaryType = 'arraybuffer';
+    dc.onopen = () => {
+      if (peerConns.has(peerId)) peerConns.get(peerId).dc = dc;
+      setStatus('connected');
+      updateCreateBtn();
+
+      // If sender has active file session, send the catalogue to late joiners
+      if (sessionMeta.length > 0) {
+        dc.send(JSON.stringify({
+          type: 'session-catalogue',
+          files: sessionMeta.map(m => ({ index: m.index, name: m.name, size: m.size, mime: m.mime, hash: m.hash })),
+        }));
+      }
+    };
+
+    dc.onmessage = async ev => {
+      if (typeof ev.data !== 'string') return;
+      const msg = JSON.parse(ev.data);
+
+      // A receiver/seeder is requesting a byte range to serve from us
+      if (msg.type === 'request-range') {
+        await serveRange(dc, msg.fileIndex, msg.start, msg.end);
+      }
+    };
+  }
+
+  // ── Serve a byte range from a buffered file ──────────────────────────────
+  async function serveRange(dc, fileIndex, start, end) {
+    let buf = fileBuffers.get(fileIndex);
+    if (!buf) {
+      // Buffer not yet loaded — read from the selected file
+      const file = selectedFiles[fileIndex];
+      if (!file) return;
+      buf = await file.arrayBuffer();
+      fileBuffers.set(fileIndex, buf);
+    }
+
+    dc.send(JSON.stringify({ type: 'range-start', fileIndex, start, end }));
+
+    let offset = start;
+    while (offset < end) {
+      // Backpressure: wait if the channel is backed up
+      while (dc.bufferedAmount > CHUNK_SIZE * 16) {
+        await new Promise(r => setTimeout(r, 20));
+      }
+      const slice = buf.slice(offset, Math.min(offset + CHUNK_SIZE, end));
+      dc.send(slice);
+      offset += slice.byteLength;
+    }
+    dc.send(JSON.stringify({ type: 'range-done', fileIndex, start, end }));
+  }
+
+  // ── Session metadata (populated when sender starts sending) ─────────────
+  let sessionMeta = []; // [{index, name, size, mime, hash}]
+
+  // ── Send files to ALL connected peers simultaneously ─────────────────────
   async function startSendingAll() {
-    const files = selectedFiles;
+    const files = selectedFiles.slice();
+    if (!files.length) return;
+
+    createBtn.disabled = true;
+    createBtn.textContent = 'Sending…';
+    setStatus('sending');
+
+    // Pre-read all file buffers (for range serving to late joiners)
+    for (let i = 0; i < files.length; i++) {
+      const buf = await files[i].arrayBuffer();
+      fileBuffers.set(i, buf);
+    }
+
+    // Build metadata
+    sessionMeta = await Promise.all(files.map(async (f, i) => ({
+      index: i, name: f.name, size: f.size, mime: f.type,
+      hash: await sha256(f),
+    })));
+
     const totalSize = files.reduce((s, f) => s + f.size, 0);
 
-    // Lock UI during transfer
-    createBtn.disabled = true;
-    createBtn.textContent = `Sending…`;
-
+    // Build per-file transfer UI
     const transferList = document.getElementById('sender-transfer-list');
     transferList.innerHTML = '';
     files.forEach((f, i) => {
@@ -872,108 +1083,134 @@ if (isSender) {
 
     document.getElementById('sender-progress').classList.remove('hidden');
     document.getElementById('sender-files-counter').textContent = `0 / ${files.length}`;
-    setStatus('sending');
 
-    dc.send(JSON.stringify({ type: 'session-start', totalFiles: files.length, totalSize }));
+    const openConns = [...peerConns.values()].filter(c => c.dc && c.dc.readyState === 'open');
+
+    // Broadcast session-start to all open DCs
+    const sessionPayload = JSON.stringify({
+      type: 'session-start', totalFiles: files.length, totalSize,
+      files: sessionMeta.map(m => ({ index: m.index, name: m.name, size: m.size, mime: m.mime, hash: m.hash })),
+    });
+    for (const conn of openConns) conn.dc.send(sessionPayload);
 
     let globalSent = 0;
     const globalStart = Date.now();
 
+    // Send each file sequentially; each peer gets the full stream
     for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+      const meta = sessionMeta[i];
+      const buf = fileBuffers.get(i);
       const statusEl = document.getElementById(`tx-status-${i}`);
       const progEl   = document.getElementById(`tx-prog-${i}`);
 
       statusEl.className = 'file-row-status sending';
       statusEl.textContent = '0%';
 
-      const hash = await sha256(file);
-      dc.send(JSON.stringify({ type: 'meta', index: i, name: file.name, size: file.size, mime: file.type, hash }));
+      // Announce file meta to all
+      const metaMsg = JSON.stringify({ type: 'meta', ...meta });
+      for (const conn of openConns) conn.dc.send(metaMsg);
 
-      await new Promise((resolve) => {
+      await new Promise(resolve => {
         let offset = 0;
-
         function sendChunk() {
-          while (offset < file.size) {
-            if (dc.bufferedAmount > CHUNK_SIZE * 16) { setTimeout(sendChunk, 50); return; }
-            const slice = file.slice(offset, offset + CHUNK_SIZE);
-            slice.arrayBuffer().then(buf => {
-              dc.send(buf);
-              offset += buf.byteLength;
-              globalSent += buf.byteLength;
+          while (offset < buf.byteLength) {
+            // Check backpressure across all connections
+            const maxBuf = Math.max(...openConns.map(c => c.dc.bufferedAmount));
+            if (maxBuf > CHUNK_SIZE * 16) { setTimeout(sendChunk, 50); return; }
 
-              const filePct = (offset / file.size) * 100;
-              statusEl.textContent = `${filePct.toFixed(0)}%`;
-              progEl.style.width = `${filePct}%`;
+            const slice = buf.slice(offset, offset + CHUNK_SIZE);
+            for (const conn of openConns) conn.dc.send(slice);
+            offset += slice.byteLength;
+            globalSent += slice.byteLength * openConns.length / openConns.length; // track once
 
-              const elapsed = (Date.now() - globalStart) / 1000;
-              const speed = elapsed > 0 ? globalSent / elapsed : 0;
-              const overallPct = (globalSent / totalSize) * 100;
+            const filePct = (offset / buf.byteLength) * 100;
+            statusEl.textContent = `${filePct.toFixed(0)}%`;
+            progEl.style.width = `${filePct}%`;
 
-              document.getElementById('sender-fill').style.width = `${overallPct}%`;
-              document.getElementById('sender-pct').textContent = `${overallPct.toFixed(0)}%`;
-              document.getElementById('sender-speed').textContent = `${fmt(speed)}/s`;
-              document.getElementById('sender-eta').textContent = fmtEta((totalSize - globalSent) / (speed || 1));
-              document.getElementById('sender-files-counter').textContent = `${i} / ${files.length}`;
-              document.getElementById('sender-progress-label').textContent = `Sending: ${file.name}`;
+            const elapsed = (Date.now() - globalStart) / 1000;
+            const speed = elapsed > 0 ? (i * files[0]?.size || 1 + offset) / elapsed : 0;
+            const approxSent = files.slice(0, i).reduce((s,f)=>s+f.size,0) + offset;
+            const overallPct = (approxSent / totalSize) * 100;
 
-              if (offset >= file.size) {
-                dc.send(JSON.stringify({ type: 'file-done', index: i }));
-                statusEl.className = 'file-row-status done';
-                statusEl.textContent = '✓';
-                progEl.style.width = '100%';
-                document.getElementById('sender-files-counter').textContent = `${i + 1} / ${files.length}`;
-                // Add to sender history (sender knows the file, no blob needed)
-                addFileToHistory('sender-history-list', 'sender-history-count', 'sender-history-section',
-                  file.name, file.size, null, true);
-                resolve();
-              } else {
-                sendChunk();
-              }
-            });
-            break;
+            document.getElementById('sender-fill').style.width = `${overallPct}%`;
+            document.getElementById('sender-pct').textContent = `${overallPct.toFixed(0)}%`;
+            document.getElementById('sender-speed').textContent = `${fmt(approxSent / Math.max(elapsed,0.1))}/s`;
+            document.getElementById('sender-eta').textContent = fmtEta((totalSize - approxSent) / Math.max(approxSent / Math.max(elapsed,0.1),1));
+            document.getElementById('sender-progress-label').textContent = `Sending: ${meta.name}`;
+
+            if (offset >= buf.byteLength) {
+              const doneMsg = JSON.stringify({ type: 'file-done', index: i });
+              for (const conn of openConns) conn.dc.send(doneMsg);
+              statusEl.className = 'file-row-status done';
+              statusEl.textContent = '✓';
+              progEl.style.width = '100%';
+              document.getElementById('sender-files-counter').textContent = `${i+1} / ${files.length}`;
+              addFileToHistory('sender-history-list','sender-history-count','sender-history-section', meta.name, meta.size, null, true);
+              resolve();
+              return;
+            }
           }
         }
         sendChunk();
       });
     }
 
-    dc.send(JSON.stringify({ type: 'all-done' }));
-    document.getElementById('sender-progress').classList.add('hidden');
+    const allDoneMsg = JSON.stringify({ type: 'all-done' });
+    for (const conn of openConns) conn.dc.send(allDoneMsg);
 
-    // Show a brief done banner
+    document.getElementById('sender-progress').classList.add('hidden');
     const doneBanner = document.getElementById('sender-done');
     doneBanner.classList.remove('hidden');
     document.getElementById('sender-done-sub').textContent =
-      `${files.length} file${files.length > 1 ? 's' : ''} delivered and verified successfully.`;
+      `${files.length} file${files.length > 1 ? 's' : ''} delivered to ${openConns.length} peer${openConns.length !== 1 ? 's' : ''}.`;
     setStatus('connected');
 
-    // Clear queue and re-enable the UI for another send after a short delay
     setTimeout(() => {
       selectedFiles = [];
-      updateUI(); // re-renders file list and resets button to "Select files to send"
+      renderFileList(); updateCreateBtn();
       doneBanner.classList.add('hidden');
     }, 3000);
   }
 }
 
-// ══════════════════════════════════════════════════════════
-// RECEIVER
-// ══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════════
+// RECEIVER / SEEDER
+// Connects to all peers in the room. When 2+ seeders exist, it splits the
+// file into ranges and downloads each range from a different seeder.
+// After completion it promotes itself to a seeder for future peers.
+// ════════════════════════════════════════════════════════════════════════════
 if (!isSender) {
-  let pc = null;
+  let mySocketId = null;
 
-  const fileStore = new Map();
-  let activeIndex = -1;
+  // peerConns: Map<peerId, { pc, dc, role }>
+  const peerConns = new Map();
 
-  let sessionTotal = 0, sessionTotalSize = 0, sessionReceived = 0, sessionReceivedSize = 0;
+  // swarmPeers: Map<peerId, { role }>
+  const swarmPeers = new Map();
+
+  // ── File reassembly state ──────────────────────────────────────────────
+  // For each file index: { meta, buffer: Uint8Array, received: Set of ranges }
+  const fileAssembly = new Map();
+  let sessionMeta = [];   // [{index, name, size, mime, hash}]
+  let sessionTotal = 0, sessionTotalSize = 0;
+  let sessionReceivedFiles = 0;
   let sessionStart = null;
 
-  const rxDot      = document.getElementById('rx-dot');
-  const rxStatus   = document.getElementById('rx-status');
-  const rxErrorBox = document.getElementById('rx-error');
-  const rxErrorMsg = document.getElementById('rx-error-msg');
-  const rxFileList = document.getElementById('rx-file-list');
+  // Swarm segment tracking for UI: Map<peerId, { bytesReceived }>
+  const peerBytesReceived = new Map();
+
+  // ── Pending range requests waiting for a channel to open ──────────────
+  // rangeQueue: [{peerId, fileIndex, start, end}]
+  let rangeQueue = [];
+  let rangesDispatched = false;
+
+  const rxFileList    = document.getElementById('rx-file-list');
+  const rxDot         = document.getElementById('rx-dot');
+  const rxStatus      = document.getElementById('rx-status');
+  const rxErrorBox    = document.getElementById('rx-error');
+  const rxErrorMsg    = document.getElementById('rx-error-msg');
+
+  socket.on('connect', () => { mySocketId = socket.id; });
 
   setupHistoryToggle('rx-history-toggle', 'rx-history-body', 'rx-history-chevron');
 
@@ -983,23 +1220,78 @@ if (!isSender) {
     document.getElementById('rx-status-title').textContent = title;
     document.getElementById('rx-status-sub').textContent = sub;
   }
-
   function setRxActive(state) {
     document.getElementById('rx-waiting-state').classList.add('hidden');
     document.getElementById('rx-transfer-state').classList.remove('hidden');
     const map = {
-      connecting: ['blue',  'Establishing connection…'],
-      receiving:  ['blue',  'Receiving files…'],
-      done:       ['green', 'All files received — SHA-256 verified ✓'],
-      failed:     ['red',   'Connection failed. Please refresh.'],
-      error:      ['red',   'Verification failed on one or more files.'],
+      connecting: ['blue',   'Connecting to swarm…'],
+      receiving:  ['purple', 'Receiving from swarm…'],
+      done:       ['green',  'All files received — SHA-256 verified ✓'],
+      failed:     ['red',    'Connection failed. Please refresh.'],
     };
     const [color, text] = map[state] || ['blue', state];
     rxDot.className = `dot ${color}`;
     rxStatus.textContent = text;
   }
 
-  setRxWaiting('Joining room…', 'Connecting to signaling server');
+  function updateRxSwarmUI() {
+    const panel = document.getElementById('rx-swarm-panel');
+    panel.classList.remove('hidden');
+    document.getElementById('rx-swarm-count').textContent =
+      `${swarmPeers.size + 1} peer${swarmPeers.size + 1 !== 1 ? 's' : ''}`;
+    const nodesEl = document.getElementById('rx-swarm-nodes');
+    nodesEl.innerHTML = '';
+
+    // Self node first
+    const selfNode = document.createElement('div');
+    selfNode.className = 'swarm-node';
+    selfNode.innerHTML = `
+      <div class="swarm-node-circle leecher self">⬇</div>
+      <div class="swarm-node-label">You</div>
+    `;
+    nodesEl.appendChild(selfNode);
+
+    for (const [pid, info] of swarmPeers) {
+      const conn = document.createElement('div');
+      conn.className = 'swarm-connector';
+      conn.textContent = '⟷';
+      nodesEl.appendChild(conn);
+      const node = document.createElement('div');
+      node.className = 'swarm-node';
+      node.innerHTML = `
+        <div class="swarm-node-circle ${info.role}">
+          ${info.role === 'sender' ? '📤' : info.role === 'seeder' ? '🌱' : '⬇'}
+        </div>
+        <div class="swarm-node-label">${shortId(pid)}</div>
+      `;
+      nodesEl.appendChild(node);
+    }
+    updateSegmentBar();
+  }
+
+  function updateSegmentBar() {
+    if (sessionTotalSize === 0 || peerBytesReceived.size === 0) return;
+    const wrap = document.getElementById('rx-segment-wrap');
+    wrap.classList.remove('hidden');
+    const bar = document.getElementById('rx-segment-bar');
+    bar.innerHTML = '';
+    let colorIdx = 0;
+    let leftPct = 0;
+    for (const [pid, info] of peerBytesReceived) {
+      const pct = (info.bytesReceived / sessionTotalSize) * 100;
+      const fill = document.createElement('div');
+      fill.className = `segment-bar-fill seg-color-${colorIdx % 4}`;
+      fill.style.width = `${pct}%`;
+      fill.style.left = `${leftPct}%`;
+      fill.title = `${shortId(pid)}: ${fmt(info.bytesReceived)}`;
+      bar.appendChild(fill);
+      leftPct += pct;
+      colorIdx++;
+    }
+  }
+
+  // ── Join the room ────────────────────────────────────────────────────────
+  setRxWaiting('Joining swarm…', 'Connecting to signaling server');
   socket.emit('join-room', { roomId: roomIdFromUrl });
 
   socket.on('room-error', ({ message }) => {
@@ -1008,218 +1300,436 @@ if (!isSender) {
     setRxWaiting('Room not found', message);
   });
 
-  socket.on('room-joined', () => setRxWaiting('Waiting for sender…', 'Keep this tab open'));
+  // room-joined: server tells us who's already in the room
+  socket.on('room-joined', async ({ roomId, peers, swarmSize }) => {
+    mySocketId = socket.id;
+    setRxWaiting('Connecting to swarm…', `${peers.length} peer${peers.length !== 1 ? 's' : ''} already here`);
 
-  socket.on('offer', async offer => {
+    for (const { socketId, role } of peers) {
+      swarmPeers.set(socketId, { role });
+    }
+    updateRxSwarmUI();
+
+    // Connect to every existing peer. Existing peers are offerers toward us? No —
+    // The server tells existing peers about us, they will send us offers.
+    // We just wait for offers from each existing peer.
+    // (openReceiverConnection is called when we receive an 'offer')
+  });
+
+  // Another peer joins after us — they will send us an offer
+  socket.on('swarm-peer-joined', async ({ newPeerId, swarmSize }) => {
+    swarmPeers.set(newPeerId, { role: 'receiver' });
+    updateRxSwarmUI();
+    // They will open a connection TO us; we'll get an offer
+  });
+
+  // Receive offer (from sender or seeder trying to connect to us)
+  socket.on('offer', async ({ fromId, offer }) => {
     setRxActive('connecting');
+    await openReceiverConnection(fromId, offer);
+  });
+
+  socket.on('answer', async ({ fromId, answer }) => {
+    const conn = peerConns.get(fromId);
+    if (conn) await conn.pc.setRemoteDescription(new RTCSessionDescription(answer));
+  });
+
+  socket.on('ice-candidate', async ({ fromId, candidate }) => {
+    const conn = peerConns.get(fromId);
+    if (conn) { try { await conn.pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch {} }
+  });
+
+  socket.on('peer-promoted', ({ peerId }) => {
+    if (swarmPeers.has(peerId)) {
+      swarmPeers.get(peerId).role = 'seeder';
+      updateRxSwarmUI();
+    }
+  });
+
+  socket.on('peer-disconnected', ({ peerId, roomClosed }) => {
+    peerConns.get(peerId)?.pc.close();
+    peerConns.delete(peerId);
+    swarmPeers.delete(peerId);
+    updateRxSwarmUI();
+    if (roomClosed) {
+      setRxActive('failed');
+      rxErrorMsg.textContent = 'Room closed by sender.';
+      rxErrorBox.classList.remove('hidden');
+    }
+  });
+
+  // ── Open a connection back to an offering peer ──────────────────────────
+  async function openReceiverConnection(fromId, offer) {
+    if (peerConns.has(fromId)) return;
     const iceServers = await getIceServers();
-    pc = new RTCPeerConnection({ iceServers });
+    const pc = new RTCPeerConnection({ iceServers });
+
+    peerConns.set(fromId, { pc, dc: null, role: swarmPeers.get(fromId)?.role || 'sender' });
 
     pc.onicecandidate = e => {
-      if (e.candidate) socket.emit('ice-candidate', { roomId: roomIdFromUrl, candidate: e.candidate });
+      if (e.candidate) socket.emit('ice-candidate', { roomId: roomIdFromUrl, targetId: fromId, candidate: e.candidate });
     };
     pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') setRxActive('failed');
+      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+        peerConns.delete(fromId);
+      }
     };
-    socket.on('ice-candidate', async c => {
-      try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch {}
-    });
 
     pc.ondatachannel = e => {
-      const ch = e.channel;
-      ch.binaryType = 'arraybuffer';
-
-      const msgQueue = [];
-      let processing = false;
-
-      async function processQueue() {
-        if (processing) return;
-        processing = true;
-        while (msgQueue.length > 0) {
-          await handleMessage(msgQueue.shift());
-        }
-        processing = false;
-      }
-
-      ch.onmessage = ev => {
-        msgQueue.push(ev.data);
-        processQueue();
-      };
-
-      async function handleMessage(data) {
-        if (typeof data === 'string') {
-          const msg = JSON.parse(data);
-
-          if (msg.type === 'session-start') {
-            sessionTotal = msg.totalFiles;
-            sessionTotalSize = msg.totalSize;
-            sessionReceived = 0;
-            sessionReceivedSize = 0;
-            sessionStart = Date.now();
-            fileStore.clear();
-            activeIndex = -1;
-            rxFileList.innerHTML = '';
-            document.getElementById('rx-overall-progress').classList.remove('hidden');
-            document.getElementById('rx-files-counter').textContent = `0 / ${sessionTotal}`;
-            setRxActive('receiving');
-          }
-
-          else if (msg.type === 'text-message') {
-            // Show receiver view active if it was in waiting state
-            document.getElementById('rx-waiting-state').classList.add('hidden');
-            document.getElementById('rx-transfer-state').classList.remove('hidden');
-            rxDot.className = 'dot green';
-            rxStatus.textContent = 'Text message received';
-
-            // Render inline text bubble
-            const bubble = document.createElement('div');
-            bubble.className = 'rx-text-item';
-            bubble.innerHTML = `
-              <div class="rx-text-label">✏️ Text Message</div>
-              <div class="rx-text-content">${msg.text.replace(/</g,'&lt;')}</div>
-              <div class="rx-text-actions">
-                <button class="history-btn" onclick="copyHistoryText(this, ${JSON.stringify(msg.text)})">📋 Copy</button>
-                ${isUrl(msg.text) ? `<a href="${msg.text.trim()}" target="_blank" rel="noopener"><button class="history-btn">↗ Open URL</button></a>` : ''}
-              </div>
-            `;
-            rxFileList.appendChild(bubble);
-
-            // Add to history
-            addTextToHistory('rx-history-list', 'rx-history-count', 'rx-history-section', msg.text);
-          }
-
-          else if (msg.type === 'meta') {
-            fileStore.set(msg.index, {
-              meta: msg,
-              chunks: [],
-              received: 0,
-              startTime: Date.now(),
-            });
-            activeIndex = msg.index;
-
-            const row = document.createElement('div');
-            row.className = 'file-row';
-            row.id = `rx-row-${msg.index}`;
-            row.innerHTML = `
-              <div class="file-row-progress" id="rx-prog-${msg.index}"></div>
-              <div class="file-row-icon">${fileEmoji(msg.name)}</div>
-              <div class="file-row-meta">
-                <div class="file-row-name">${msg.name}</div>
-                <div class="file-row-size">${fmt(msg.size)}</div>
-              </div>
-              <span class="file-row-status sending" id="rx-fstatus-${msg.index}">0%</span>
-            `;
-            rxFileList.appendChild(row);
-            document.getElementById('rx-progress-label').textContent = `Receiving: ${msg.name}`;
-          }
-
-          else if (msg.type === 'file-done') {
-            const idx = msg.index;
-            const entry = fileStore.get(idx);
-            if (!entry) return;
-
-            const { meta, chunks } = entry;
-            const blob = new Blob(chunks, { type: meta.mime });
-
-            const computedHash = await sha256(blob);
-            const verified = computedHash === meta.hash;
-
-            const statusEl = document.getElementById(`rx-fstatus-${idx}`);
-            const progEl   = document.getElementById(`rx-prog-${idx}`);
-
-            const blobUrl = URL.createObjectURL(blob);
-
-            if (verified) {
-              statusEl.className = 'file-row-status done';
-              statusEl.textContent = '✓';
-              progEl.style.width = '100%';
-
-              // Auto-download
-              const a = document.createElement('a');
-              a.href = blobUrl; a.download = meta.name; a.click();
-
-              // Manual re-download button on the row
-              const dlA = document.createElement('a');
-              dlA.href = blobUrl;
-              dlA.download = meta.name;
-              dlA.style.cssText = 'position:relative;z-index:1;flex-shrink:0';
-              dlA.innerHTML = `<button class="btn-sm" style="background:#dcfce7;color:#15803d">⬇</button>`;
-              document.getElementById(`rx-row-${idx}`).appendChild(dlA);
-            } else {
-              statusEl.className = 'file-row-status error';
-              statusEl.textContent = '⚠️';
-            }
-
-            // Add to history with re-download link
-            addFileToHistory('rx-history-list', 'rx-history-count', 'rx-history-section',
-              meta.name, meta.size, verified ? blobUrl : null, verified);
-
-            fileStore.delete(idx);
-
-            sessionReceived++;
-            document.getElementById('rx-files-counter').textContent = `${sessionReceived} / ${sessionTotal}`;
-          }
-
-          else if (msg.type === 'all-done') {
-            const rxDoneBanner = document.getElementById('rx-done');
-            rxDoneBanner.classList.remove('hidden');
-            document.getElementById('rx-done-sub').textContent =
-              `${sessionTotal} file${sessionTotal > 1 ? 's' : ''} SHA-256 verified — no corruption detected.`;
-            setRxActive('done');
-            // Auto-dismiss after 3s and reset progress bar, ready for next batch
-            setTimeout(() => {
-              rxDoneBanner.classList.add('hidden');
-              document.getElementById('rx-overall-progress').classList.add('hidden');
-              document.getElementById('rx-fill').style.width = '0%';
-              document.getElementById('rx-pct').textContent = '0%';
-              document.getElementById('rx-speed').textContent = '—';
-              document.getElementById('rx-eta').textContent = '—';
-              rxDot.className = 'dot green';
-              rxStatus.textContent = 'Ready — waiting for more files';
-            }, 3000);
-          }
-
-          return;
-        }
-
-        // Binary chunk
-        const entry = fileStore.get(activeIndex);
-        if (!entry) return;
-
-        entry.chunks.push(data);
-        entry.received += data.byteLength;
-        sessionReceivedSize += data.byteLength;
-
-        const filePct = (entry.received / entry.meta.size) * 100;
-        const statusEl = document.getElementById(`rx-fstatus-${activeIndex}`);
-        const progEl   = document.getElementById(`rx-prog-${activeIndex}`);
-        if (statusEl) statusEl.textContent = `${filePct.toFixed(0)}%`;
-        if (progEl) progEl.style.width = `${filePct}%`;
-
-        const elapsed = (Date.now() - sessionStart) / 1000;
-        const speed = elapsed > 0 ? sessionReceivedSize / elapsed : 0;
-        const overallPct = sessionTotalSize > 0 ? (sessionReceivedSize / sessionTotalSize) * 100 : 0;
-
-        document.getElementById('rx-fill').style.width = `${overallPct}%`;
-        document.getElementById('rx-pct').textContent = `${overallPct.toFixed(0)}%`;
-        document.getElementById('rx-speed').textContent = `${fmt(speed)}/s`;
-        document.getElementById('rx-eta').textContent = fmtEta((sessionTotalSize - sessionReceivedSize) / (speed || 1));
-      }
+      const dc = e.channel;
+      dc.binaryType = 'arraybuffer';
+      peerConns.get(fromId).dc = dc;
+      setupReceiverDataChannel(dc, fromId);
     };
 
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
-    socket.emit('answer', { roomId: roomIdFromUrl, answer });
-  });
+    socket.emit('answer', { roomId: roomIdFromUrl, targetId: fromId, answer });
+  }
 
-  socket.on('peer-disconnected', () => {
-    if (rxStatus && !rxStatus.textContent.includes('complete') && !rxStatus.textContent.includes('received')) {
-      setRxActive('failed');
-      rxErrorMsg.textContent = 'Sender disconnected.';
-      rxErrorBox.classList.remove('hidden');
+  // ── Setup a data channel from a seeder/sender peer ───────────────────────
+  // currentRangeMeta: for binary chunk routing
+  // { fileIndex, start, end, offset } — which range we're receiving on this channel
+  function setupReceiverDataChannel(dc, peerId) {
+    let currentRange = null; // { fileIndex, start, currentOffset }
+    let peerId_ = peerId;
+
+    dc.onopen = () => {
+      // If we already have session metadata (late joiner scenario won't apply to first receiver
+      // but could if seeder sends us a catalogue), dispatch our pending ranges
+      tryDispatchRanges();
+    };
+
+    dc.onmessage = async ev => {
+      if (typeof ev.data === 'string') {
+        const msg = JSON.parse(ev.data);
+
+        // ── Full-stream messages (original protocol, first receiver gets this) ──
+        if (msg.type === 'session-start' || msg.type === 'session-catalogue') {
+          // session-start: first peer to join gets the full streamed session
+          // session-catalogue: late joiner gets metadata + will request ranges
+          sessionMeta = msg.files;
+          sessionTotal = msg.totalFiles || msg.files.length;
+          sessionTotalSize = msg.totalSize || msg.files.reduce((s, f) => s + f.size, 0);
+          sessionStart = Date.now();
+          sessionReceivedFiles = 0;
+
+          // Pre-allocate Uint8Arrays for each file
+          fileAssembly.clear();
+          for (const f of sessionMeta) {
+            fileAssembly.set(f.index, {
+              meta: f,
+              buffer: new Uint8Array(f.size),
+              bytesWritten: 0,
+              done: false,
+            });
+          }
+
+          rxFileList.innerHTML = '';
+          document.getElementById('rx-overall-progress').classList.remove('hidden');
+          document.getElementById('rx-files-counter').textContent = `0 / ${sessionTotal}`;
+
+          for (const f of sessionMeta) {
+            const row = document.createElement('div');
+            row.className = 'file-row';
+            row.id = `rx-row-${f.index}`;
+            row.innerHTML = `
+              <div class="file-row-progress" id="rx-prog-${f.index}"></div>
+              <div class="file-row-icon">${fileEmoji(f.name)}</div>
+              <div class="file-row-meta">
+                <div class="file-row-name">${f.name}</div>
+                <div class="file-row-size">${fmt(f.size)}</div>
+              </div>
+              <span class="file-row-status sending" id="rx-fstatus-${f.index}">0%</span>
+            `;
+            rxFileList.appendChild(row);
+          }
+
+          if (msg.type === 'session-catalogue') {
+            // Late joiner: request ranges from available seeders
+            setRxActive('receiving');
+            document.getElementById('rx-progress-label').textContent = 'Swarming…';
+            dispatchSwarmRanges();
+          } else {
+            setRxActive('receiving');
+            document.getElementById('rx-progress-label').textContent = `Receiving: ${sessionMeta[0]?.name || ''}`;
+          }
+        }
+
+        else if (msg.type === 'text-message') {
+          document.getElementById('rx-waiting-state').classList.add('hidden');
+          document.getElementById('rx-transfer-state').classList.remove('hidden');
+          rxDot.className = 'dot green';
+          rxStatus.textContent = 'Text message received';
+          const bubble = document.createElement('div');
+          bubble.className = 'rx-text-item';
+          bubble.innerHTML = `
+            <div class="rx-text-label">✏️ Text Message</div>
+            <div class="rx-text-content">${msg.text.replace(/</g,'&lt;')}</div>
+            <div class="rx-text-actions">
+              <button class="history-btn" onclick="copyHistoryText(this, ${JSON.stringify(msg.text)})">📋 Copy</button>
+              ${isUrl(msg.text) ? `<a href="${msg.text.trim()}" target="_blank" rel="noopener"><button class="history-btn">↗ Open URL</button></a>` : ''}
+            </div>
+          `;
+          rxFileList.appendChild(bubble);
+          addTextToHistory('rx-history-list', 'rx-history-count', 'rx-history-section', msg.text);
+        }
+
+        else if (msg.type === 'meta') {
+          // Sequential stream: a single-seeder session with explicit meta per file
+          document.getElementById('rx-progress-label').textContent = `Receiving: ${msg.name}`;
+          if (!fileAssembly.has(msg.index)) {
+            fileAssembly.set(msg.index, {
+              meta: msg,
+              buffer: new Uint8Array(msg.size),
+              bytesWritten: 0,
+              done: false,
+            });
+            // Build row if not already built
+            if (!document.getElementById(`rx-row-${msg.index}`)) {
+              const row = document.createElement('div');
+              row.className = 'file-row';
+              row.id = `rx-row-${msg.index}`;
+              row.innerHTML = `
+                <div class="file-row-progress" id="rx-prog-${msg.index}"></div>
+                <div class="file-row-icon">${fileEmoji(msg.name)}</div>
+                <div class="file-row-meta">
+                  <div class="file-row-name">${msg.name}</div>
+                  <div class="file-row-size">${fmt(msg.size)}</div>
+                </div>
+                <span class="file-row-status sending" id="rx-fstatus-${msg.index}">0%</span>
+              `;
+              rxFileList.appendChild(row);
+            }
+          }
+          // In sequential mode, binary chunks follow this meta message on the same channel
+          currentRange = { fileIndex: msg.index, start: 0, currentOffset: 0 };
+        }
+
+        else if (msg.type === 'range-start') {
+          // Swarm mode: a specific range is starting
+          currentRange = { fileIndex: msg.fileIndex, start: msg.start, currentOffset: msg.start };
+        }
+
+        else if (msg.type === 'range-done') {
+          currentRange = null;
+          // Check if any file is now complete
+          checkFileCompletion(msg.fileIndex, peerId_);
+        }
+
+        else if (msg.type === 'file-done') {
+          // Sequential mode file done
+          currentRange = null;
+          await finalizeFile(msg.index, peerId_);
+        }
+
+        else if (msg.type === 'all-done') {
+          // Sequential mode all done
+          showAllDone();
+        }
+
+        return;
+      }
+
+      // ── Binary chunk ───────────────────────────────────────────────────
+      if (!currentRange) return;
+      const { fileIndex, currentOffset } = currentRange;
+      const data = new Uint8Array(ev.data);
+      const entry = fileAssembly.get(fileIndex);
+      if (!entry) return;
+
+      entry.buffer.set(data, currentOffset);
+      currentRange.currentOffset += data.byteLength;
+      entry.bytesWritten += data.byteLength;
+
+      // Track per-peer bytes
+      if (!peerBytesReceived.has(peerId_)) peerBytesReceived.set(peerId_, { bytesReceived: 0 });
+      peerBytesReceived.get(peerId_).bytesReceived += data.byteLength;
+
+      // Update progress UI
+      const filePct = (entry.bytesWritten / entry.meta.size) * 100;
+      const statusEl = document.getElementById(`rx-fstatus-${fileIndex}`);
+      const progEl   = document.getElementById(`rx-prog-${fileIndex}`);
+      if (statusEl) statusEl.textContent = `${Math.min(filePct, 100).toFixed(0)}%`;
+      if (progEl) progEl.style.width = `${Math.min(filePct, 100)}%`;
+
+      // Overall progress
+      const totalReceived = [...fileAssembly.values()].reduce((s, e) => s + e.bytesWritten, 0);
+      const elapsed = (Date.now() - sessionStart) / 1000;
+      const speed = elapsed > 0 ? totalReceived / elapsed : 0;
+      const overallPct = sessionTotalSize > 0 ? (totalReceived / sessionTotalSize) * 100 : 0;
+      document.getElementById('rx-fill').style.width = `${Math.min(overallPct, 100)}%`;
+      document.getElementById('rx-pct').textContent = `${Math.min(overallPct, 100).toFixed(0)}%`;
+      document.getElementById('rx-speed').textContent = `${fmt(speed)}/s`;
+      document.getElementById('rx-eta').textContent = fmtEta((sessionTotalSize - totalReceived) / (speed || 1));
+
+      updateSegmentBar();
+    };
+  }
+
+  // ── Swarm range dispatch: split files across available seeders ────────────
+  function dispatchSwarmRanges() {
+    if (rangesDispatched) return;
+    rangesDispatched = true;
+
+    // Get all open data channels to seeders/sender
+    const openConns = [...peerConns.entries()]
+      .filter(([, c]) => c.dc && c.dc.readyState === 'open');
+
+    if (openConns.length === 0) {
+      // No open connections yet — queue and retry when one opens
+      rangesDispatched = false;
+      return;
     }
-  });
+
+    // For each file, split byte range evenly across available peers
+    for (const f of sessionMeta) {
+      const size = f.size;
+      const numPeers = openConns.length;
+      const rangeSize = Math.ceil(size / numPeers);
+
+      openConns.forEach(([peerId, conn], idx) => {
+        const start = idx * rangeSize;
+        const end = Math.min(start + rangeSize, size);
+        if (start >= size) return;
+
+        conn.dc.send(JSON.stringify({
+          type: 'request-range',
+          fileIndex: f.index,
+          start,
+          end,
+        }));
+
+        // Initialize per-peer tracking
+        if (!peerBytesReceived.has(peerId)) peerBytesReceived.set(peerId, { bytesReceived: 0 });
+      });
+    }
+  }
+
+  function tryDispatchRanges() {
+    if (sessionMeta.length > 0 && !rangesDispatched) {
+      dispatchSwarmRanges();
+    }
+  }
+
+  // ── Check if a file's buffer is fully received (swarm mode) ──────────────
+  async function checkFileCompletion(fileIndex, peerId) {
+    const entry = fileAssembly.get(fileIndex);
+    if (!entry || entry.done) return;
+    if (entry.bytesWritten >= entry.meta.size) {
+      await finalizeFile(fileIndex, peerId);
+    }
+    // Check if all files done
+    const allDone = [...fileAssembly.values()].every(e => e.done);
+    if (allDone) showAllDone();
+  }
+
+  async function finalizeFile(fileIndex, peerId) {
+    const entry = fileAssembly.get(fileIndex);
+    if (!entry || entry.done) return;
+    entry.done = true;
+
+    const { meta, buffer } = entry;
+    const blob = new Blob([buffer], { type: meta.mime });
+    const computedHash = await sha256(blob);
+    const verified = computedHash === meta.hash;
+
+    const statusEl = document.getElementById(`rx-fstatus-${fileIndex}`);
+    const progEl   = document.getElementById(`rx-prog-${fileIndex}`);
+
+    const blobUrl = URL.createObjectURL(blob);
+
+    if (verified) {
+      if (statusEl) { statusEl.className = 'file-row-status done'; statusEl.textContent = '✓'; }
+      if (progEl) progEl.style.width = '100%';
+      const a = document.createElement('a');
+      a.href = blobUrl; a.download = meta.name; a.click();
+      const dlA = document.createElement('a');
+      dlA.href = blobUrl; dlA.download = meta.name;
+      dlA.style.cssText = 'position:relative;z-index:1;flex-shrink:0';
+      dlA.innerHTML = `<button class="btn-sm" style="background:#dcfce7;color:#15803d">⬇</button>`;
+      const row = document.getElementById(`rx-row-${fileIndex}`);
+      if (row) row.appendChild(dlA);
+    } else {
+      if (statusEl) { statusEl.className = 'file-row-status error'; statusEl.textContent = '⚠️'; }
+    }
+
+    addFileToHistory('rx-history-list','rx-history-count','rx-history-section',
+      meta.name, meta.size, verified ? blobUrl : null, verified);
+
+    sessionReceivedFiles++;
+    document.getElementById('rx-files-counter').textContent = `${sessionReceivedFiles} / ${sessionTotal}`;
+
+    // Also serve range requests now that we have this file's buffer in memory
+    // (so we act as seeder for this file toward future peers)
+  }
+
+  function showAllDone() {
+    const rxDoneBanner = document.getElementById('rx-done');
+    rxDoneBanner.classList.remove('hidden');
+
+    const peerCount = peerBytesReceived.size;
+    document.getElementById('rx-done-sub').textContent = peerCount > 1
+      ? `${sessionTotal} file${sessionTotal !== 1 ? 's' : ''} swarmed from ${peerCount} peers — SHA-256 verified.`
+      : `${sessionTotal} file${sessionTotal !== 1 ? 's' : ''} SHA-256 verified.`;
+
+    setRxActive('done');
+
+    // Promote self to seeder in the swarm
+    socket.emit('promote-to-seeder', { roomId: roomIdFromUrl });
+
+    // Update self node in swarm UI — we're now a seeder
+    updateRxSwarmUI();
+
+    // Also handle range requests from future peers arriving on our channels
+    // (future peers will connect to us as a seeder and request ranges)
+    // Our existing dc.onmessage already handles 'request-range' — but we need
+    // to serve from our assembled buffers. Patch in buffer-serving on our DCs:
+    for (const [pid, conn] of peerConns) {
+      if (conn.dc) {
+        const originalOnMessage = conn.dc.onmessage;
+        conn.dc.onmessage = async (ev) => {
+          if (typeof ev.data === 'string') {
+            const msg = JSON.parse(ev.data);
+            if (msg.type === 'request-range') {
+              await serveRangeFromBuffer(conn.dc, msg.fileIndex, msg.start, msg.end);
+              return;
+            }
+          }
+          if (originalOnMessage) originalOnMessage(ev);
+        };
+      }
+    }
+
+    setTimeout(() => {
+      rxDoneBanner.classList.add('hidden');
+      document.getElementById('rx-overall-progress').classList.add('hidden');
+      document.getElementById('rx-fill').style.width = '0%';
+      document.getElementById('rx-pct').textContent = '0%';
+      document.getElementById('rx-speed').textContent = '—';
+      document.getElementById('rx-eta').textContent = '—';
+      rxDot.className = 'dot green';
+      rxStatus.textContent = '🌱 Seeding — ready to serve new peers';
+    }, 4000);
+  }
+
+  // ── Serve a range from our in-memory assembled buffers ────────────────────
+  async function serveRangeFromBuffer(dc, fileIndex, start, end) {
+    const entry = fileAssembly.get(fileIndex);
+    if (!entry || !entry.done) return;
+    const buf = entry.buffer.buffer; // underlying ArrayBuffer
+
+    dc.send(JSON.stringify({ type: 'range-start', fileIndex, start, end }));
+    let offset = start;
+    while (offset < end) {
+      while (dc.bufferedAmount > CHUNK_SIZE * 16) await new Promise(r => setTimeout(r, 20));
+      const slice = buf.slice(offset, Math.min(offset + CHUNK_SIZE, end));
+      dc.send(slice);
+      offset += slice.byteLength;
+    }
+    dc.send(JSON.stringify({ type: 'range-done', fileIndex, start, end }));
+  }
 }
 
 function isUrl(text) {
