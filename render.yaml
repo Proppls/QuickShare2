@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: peerdrop-server
+    name: QuickShare2-server
     runtime: node
     rootDir: server
     buildCommand: npm install
