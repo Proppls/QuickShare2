@@ -15,15 +15,7 @@ const io = new Server(server, {
   cors: { origin: allowedOrigins, methods: ['GET', 'POST'] },
 });
 
-/**
- * rooms: Map<roomId, {
- *   host: socketId,          // creator (sender)
- *   peers: Map<socketId, { role: 'sender'|'receiver'|'seeder' }>
- * }>
- *
- * Mesh swarm: every peer in the room can connect to every other peer.
- * The signaling server routes offers/answers/ICE by explicit targetId.
- */
+
 const rooms = new Map();
 
 function makeRoomId() {
