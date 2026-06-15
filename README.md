@@ -4,7 +4,7 @@
 
 PeerDrop uses **WebRTC Data Channels** to transfer files directly between two browsers. The signaling server only coordinates the initial handshake — your file never touches it.
 
-![PeerDrop](https://img.shields.io/badge/WebRTC-P2P-blue?style=flat-square) ![Socket.io](https://img.shields.io/badge/Socket.io-4.x-black?style=flat-square) ![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=flat-square) ![License](https://img.shields.io/badge/license-MIT-orange?style=flat-square)
+![PeerDrop](https://img.shields.io/badge/WebRTC-P2P-blue?style=flat-square) ![Socket.io](https://img.shields.io/badge/Socket.io-4.x-black?style=flat-square) ![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=flat-square) 
 
 ---
 
